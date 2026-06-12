@@ -15,7 +15,8 @@ struct ExportMetadataProcessorTests {
             AVEncoderBitRateKey: 64000,
         ]
         let sourceFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 1)!
-        let frameCount: AVAudioFrameCount = 44100
+        // Two seconds: import validation requires a duration strictly above 1s.
+        let frameCount: AVAudioFrameCount = 88200
         let pcmBuffer = AVAudioPCMBuffer(pcmFormat: sourceFormat, frameCapacity: frameCount)!
         pcmBuffer.frameLength = frameCount
 

@@ -32,6 +32,9 @@ extension DatabaseManager {
         if !result.invalidRelativePaths.isEmpty {
             eventSubject.send(.invalidFilesRemoved(relativePaths: result.invalidRelativePaths))
         }
+        if !result.transientFailureRelativePaths.isEmpty {
+            DBLog.warning(logger, "DatabaseManager", "rebuild skipped \(result.transientFailureRelativePaths.count) file(s) after transient inspect failures; they remain on disk for the next rebuild")
+        }
         eventSubject.send(
             .indexRebuildFinished(
                 scanned: result.scanned,
@@ -60,6 +63,10 @@ extension DatabaseManager {
         }
 
         let inputExtension = url.pathExtension.nilIfEmpty ?? "m4a"
+        // Inspect before moving: a file that fails validation never enters the
+        // library, the source stays intact, and any previously ingested copy at
+        // the destination is not destroyed by the move.
+        let inspection = try await dependencies.inspectAudioFile(url)
         let moved = try fileManager.moveToLibrary(
             from: url,
             trackID: metadata.trackID,
@@ -69,7 +76,6 @@ extension DatabaseManager {
         let attributes = try FileManager.default.attributesOfItem(atPath: moved.finalURL.path)
         let fileSize = (attributes[.size] as? NSNumber)?.int64Value ?? 0
         let modifiedAt = attributes[.modificationDate] as? Date ?? .init()
-        let inspection = try await dependencies.inspectAudioFile(moved.finalURL)
 
         if let artwork = inspection.embeddedArtwork {
             try? cacheCoordinator.writeArtwork(data: artwork, trackID: metadata.trackID)

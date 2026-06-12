@@ -19,9 +19,12 @@ extension DownloadManager {
             .removeDuplicates()
             .sink { [weak self] _ in
                 guard let self else { return }
-                let limit = maxConcurrent
-                DiggerManager.shared.maxConcurrentTasksCount = limit
-                AppLog.info(self, "Max concurrent downloads changed to \(limit)")
+                // Digger rebuilds its URLSession when the limit is assigned,
+                // cancelling every in-flight download. Our own queue gating
+                // picks up the new limit immediately; Digger's session limit is
+                // synced later when no download is active.
+                AppLog.info(self, "Max concurrent downloads changed to \(maxConcurrent)")
+                syncDiggerConcurrencyIfNeeded()
                 processNextIfNeeded()
             }
             .store(in: &cancellables)

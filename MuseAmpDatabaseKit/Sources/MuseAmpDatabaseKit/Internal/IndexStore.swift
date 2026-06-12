@@ -124,6 +124,7 @@ struct IndexStore {
                 trackCount: tracks.count,
                 artworkTrackID: tracks.first(where: \.hasEmbeddedArtwork)?.trackID,
                 totalDurationSeconds: tracks.reduce(0) { $0 + $1.durationSeconds },
+                latestModifiedAt: tracks.map(\.updatedAt).max(),
             )
         }
         .sorted {

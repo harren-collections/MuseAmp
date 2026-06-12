@@ -22,9 +22,9 @@ extension PlaybackController {
         for resolvedItems: [ResolvedPlaybackItem],
         session: PersistedPlaybackSession,
     ) -> Int {
-        if resolvedItems.indices.contains(session.currentIndex) {
-            return session.currentIndex
-        }
+        // resolvedItems is the filtered queue: positions shift when tracks fail
+        // to resolve, so the persisted index is only meaningful through the
+        // track ID or the original (pre-filter) index, never directly.
         if let exactMatch = resolvedItems.firstIndex(where: { $0.track.id == session.currentTrackID }) {
             return exactMatch
         }

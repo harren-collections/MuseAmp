@@ -77,7 +77,7 @@ struct PathConformanceTests {
     func `syncLibrary prunes unreadable opaque files`() async throws {
         let sandbox = TestLibrarySandbox()
         let database = try sandbox.makeDatabase { _ in
-            throw NSError(domain: "test", code: 1, userInfo: [NSLocalizedDescriptionKey: "unreadable"])
+            throw AudioFileValidationError.notPlayable(reason: "unreadable")
         }
         let paths = database.paths
         let indexer = SongLibraryIndexer(databaseManager: database.databaseManager)

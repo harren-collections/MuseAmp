@@ -27,6 +27,7 @@ extension DownloadManager {
         updateDeferredStatesForPendingTasks()
         if activeCount == 0 {
             syncDiggerHTTPHeadersIfNeeded()
+            syncDiggerConcurrencyIfNeeded()
         }
         while activeCount < maxConcurrent {
             guard
@@ -45,6 +46,11 @@ extension DownloadManager {
             AppLog.warning(self, "startResolving: task not found for trackID=\(trackID)")
             return
         }
+
+        // A task that starts (or resumes) downloading is no longer
+        // intentionally paused; a stale entry here would swallow genuine
+        // cancellation errors in handleCompletion.
+        intentionallyPaused.remove(trackID)
 
         // URL already resolved (e.g. resuming after pause-during-resolve) — skip API call
         if let url = task.url {

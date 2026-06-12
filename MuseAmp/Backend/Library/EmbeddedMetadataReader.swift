@@ -51,9 +51,9 @@ final nonisolated class EmbeddedMetadataReader: @unchecked Sendable {
         fileSize: Int64,
         modifiedAt: Date,
     ) async throws -> AudioTrackRecord {
+        try validateFileIsReadable(at: fileURL)
         let asset = AVURLAsset(url: fileURL)
-        let duration = try await asset.load(.duration)
-        let durationSeconds = max(CMTimeGetSeconds(duration), 0)
+        let durationSeconds = try await validatePlayability(of: asset, fileURL: fileURL)
         let metadataItems = try await collectMetadataItems(from: asset)
         let fileName = fileURL.deletingPathExtension().lastPathComponent
         let title = await stringValue(in: metadataItems, matching: ["title", "songName"]) ?? fileName
@@ -96,6 +96,42 @@ final nonisolated class EmbeddedMetadataReader: @unchecked Sendable {
 }
 
 private nonisolated extension EmbeddedMetadataReader {
+    /// Opens the file and reads a leading chunk so that pure I/O problems
+    /// (missing file, locked file protection) surface as non-validation errors
+    /// before any playability verdict is made. Only a successfully opened but
+    /// empty file is a deterministic validation failure.
+    func validateFileIsReadable(at fileURL: URL) throws {
+        let handle = try FileHandle(forReadingFrom: fileURL)
+        defer { try? handle.close() }
+        let probe = try handle.read(upToCount: 4096)
+        guard let probe, !probe.isEmpty else {
+            throw AudioFileValidationError.unreadable(reason: "file is empty")
+        }
+    }
+
+    func validatePlayability(of asset: AVURLAsset, fileURL: URL) async throws -> TimeInterval {
+        let isPlayable: Bool
+        let duration: CMTime
+        do {
+            (isPlayable, duration) = try await asset.load(.isPlayable, .duration)
+        } catch {
+            // The readability probe already passed, so a load failure means the
+            // container is not decodable rather than a transient I/O problem.
+            AppLog.error(self, "asset properties failed to load for '\(fileURL.lastPathComponent)': \(error.localizedDescription)")
+            throw AudioFileValidationError.notPlayable(reason: error.localizedDescription)
+        }
+        guard isPlayable else {
+            AppLog.error(self, "asset is not playable '\(fileURL.lastPathComponent)'")
+            throw AudioFileValidationError.notPlayable(reason: "AVURLAsset reports the file is not playable")
+        }
+        let durationSeconds = CMTimeGetSeconds(duration)
+        guard AudioFileValidationError.isDurationValid(durationSeconds) else {
+            AppLog.error(self, "asset duration \(durationSeconds)s out of range '\(fileURL.lastPathComponent)'")
+            throw AudioFileValidationError.durationOutOfRange(durationSeconds)
+        }
+        return durationSeconds
+    }
+
     func collectMetadataItems(from asset: AVURLAsset) async throws -> [AVMetadataItem] {
         try await AVMetadataHelper.collectMetadataItems(from: asset)
     }

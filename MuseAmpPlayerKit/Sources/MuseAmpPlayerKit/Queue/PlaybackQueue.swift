@@ -433,13 +433,21 @@ struct PlaybackQueue {
 
         // Adjust shufflePermutation
         if shuffled {
+            // currentIndex is a position into the permutation; removing an
+            // entry at an earlier position must shift it down or every later
+            // lookup points one past the real current item.
+            let removedPosition = shufflePermutation.firstIndex(of: canonicalIndex)
             shufflePermutation = shufflePermutation.compactMap { idx in
                 if idx == canonicalIndex { return nil }
                 return idx > canonicalIndex ? idx - 1 : idx
             }
-            // Adjust currentIndex if it now exceeds the permutation bounds
-            if let ci = currentIndex, ci > shufflePermutation.count {
-                currentIndex = max(0, shufflePermutation.count - 1)
+            if let ci = currentIndex {
+                if let removedPosition, removedPosition < ci {
+                    currentIndex = ci - 1
+                }
+                if let adjusted = currentIndex, adjusted >= shufflePermutation.count {
+                    currentIndex = shufflePermutation.isEmpty ? nil : shufflePermutation.count - 1
+                }
             }
         } else {
             if let ci = currentIndex, canonicalIndex < ci {

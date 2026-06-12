@@ -65,14 +65,19 @@ extension LyricTimelineView {
             )
             .receive(on: DispatchQueue.main)
             .map { phase, currentTime in
-                Self.buildSnapshot(phase: phase, currentTime: currentTime)
+                (phase, Self.buildSnapshot(phase: phase, currentTime: currentTime))
             }
 
         dataSource
-            .removeDuplicates()
-            .sink { [weak self] snapshot in
+            .removeDuplicates { $0.0 == $1.0 && $0.1 == $1.1 }
+            .sink { [weak self] phase, snapshot in
                 guard let self else { return }
                 AppLog.verbose(self, "snapshot received itemCount=\(snapshot.items.count)")
+                if case let .loaded(parsed) = phase {
+                    renderedTimeline = parsed.timeline
+                } else {
+                    renderedTimeline = nil
+                }
                 applySnapshot(snapshot)
                 focusSubject.send()
             }
