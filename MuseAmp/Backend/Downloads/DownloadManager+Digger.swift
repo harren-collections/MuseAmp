@@ -20,6 +20,15 @@ extension DownloadManager {
         DiggerManager.shared.additionalHTTPHeaders = headers
     }
 
+    /// Assigning the limit makes Digger invalidate its session, so only call
+    /// this while no download is in flight.
+    func syncDiggerConcurrencyIfNeeded() {
+        guard activeCount == 0 else { return }
+        let limit = maxConcurrent
+        guard DiggerManager.shared.maxConcurrentTasksCount != limit else { return }
+        DiggerManager.shared.maxConcurrentTasksCount = limit
+    }
+
     func startDiggerDownload(for task: ActiveDownloadTask) {
         guard let url = task.url else {
             AppLog.error(self, "startDiggerDownload missing URL for trackID=\(task.trackID)")
@@ -161,6 +170,7 @@ extension DownloadManager {
                 hasMarkedDownloading.remove(url)
                 diggerStartedURLs.remove(url)
             }
+            intentionallyPaused.remove(trackID)
             cleanupLocalAudioArtifacts(for: task)
         }
 

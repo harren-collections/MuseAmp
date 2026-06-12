@@ -19,6 +19,7 @@ public struct AlbumGroup: Sendable, Codable, Hashable, Identifiable {
     public let trackCount: Int
     public let artworkTrackID: String?
     public let totalDurationSeconds: Double
+    public let latestModifiedAt: Date?
 
     public init(
         albumID: String,
@@ -28,6 +29,7 @@ public struct AlbumGroup: Sendable, Codable, Hashable, Identifiable {
         trackCount: Int,
         artworkTrackID: String? = nil,
         totalDurationSeconds: Double,
+        latestModifiedAt: Date? = nil,
     ) {
         self.albumID = albumID
         self.albumTitle = albumTitle
@@ -36,5 +38,6 @@ public struct AlbumGroup: Sendable, Codable, Hashable, Identifiable {
         self.trackCount = trackCount
         self.artworkTrackID = artworkTrackID
         self.totalDurationSeconds = totalDurationSeconds
+        self.latestModifiedAt = latestModifiedAt
     }
 }

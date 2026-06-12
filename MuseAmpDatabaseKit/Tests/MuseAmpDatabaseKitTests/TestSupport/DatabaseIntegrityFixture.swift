@@ -8,8 +8,6 @@
 import Foundation
 import MuseAmpDatabaseKit
 
-private struct InspectionFailure: Error {}
-
 actor InspectionProvider {
     private var failingTrackIDs: Set<String> = []
     private var metadataByTrackID: [String: ImportedTrackMetadata] = [:]
@@ -29,7 +27,9 @@ actor InspectionProvider {
     func inspect(fileURL: URL) throws -> AudioFileInspection {
         let trackID = fileURL.deletingPathExtension().lastPathComponent
         if failingTrackIDs.contains(trackID) {
-            throw InspectionFailure()
+            // Only a validation verdict allows the scanner to prune the file;
+            // other error types are treated as transient and keep it on disk.
+            throw AudioFileValidationError.notPlayable(reason: "fixture failure")
         }
 
         let albumID = fileURL.deletingLastPathComponent().lastPathComponent

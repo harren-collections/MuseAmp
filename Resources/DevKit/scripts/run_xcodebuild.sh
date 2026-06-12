@@ -92,6 +92,7 @@ normalize_log() {
         s/\x04//g;
         next if m{Metal\.xctoolchain/usr/lib/swift/maccatalyst};
         next if m{CoreData: error: Failed to create NSXPCConnection};
+        next if m{connection to service named com\.apple\.linkd\.autoShortcut};
         print;
     ' "$RAW_LOG" >"$LOG"
 }
@@ -123,9 +124,9 @@ if [ -n "$PROJECT_PATH" ] && grep -F "is not a workspace file" "$LOG" >/dev/null
 fi
 
 if command -v xcbeautify >/dev/null 2>&1; then
-    xcbeautify --disable-colored-output --disable-logging <"$LOG" | grep -Ev 'Metal\.xctoolchain/usr/lib/swift/maccatalyst|CoreData: error: Failed to create NSXPCConnection'
+    xcbeautify --disable-colored-output --disable-logging <"$LOG" | grep -Ev 'Metal\.xctoolchain/usr/lib/swift/maccatalyst|CoreData: error: Failed to create NSXPCConnection|connection to service named com\.apple\.linkd\.autoShortcut'
 else
-    grep -Ev 'Metal\.xctoolchain/usr/lib/swift/maccatalyst|CoreData: error: Failed to create NSXPCConnection' "$LOG"
+    grep -Ev 'Metal\.xctoolchain/usr/lib/swift/maccatalyst|CoreData: error: Failed to create NSXPCConnection|connection to service named com\.apple\.linkd\.autoShortcut' "$LOG"
 fi
 
 # Patterns that must never appear in a successful log.

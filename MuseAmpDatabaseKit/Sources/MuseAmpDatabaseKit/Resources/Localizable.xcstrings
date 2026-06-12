@@ -17,6 +17,54 @@
         }
       }
     },
+    "Audio duration %lld seconds is outside the supported range" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio duration %lld seconds is outside the supported range"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音频时长 %lld 秒超出支持范围"
+          }
+        }
+      }
+    },
+    "Audio file cannot be played: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio file cannot be played: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音频文件无法播放：%@"
+          }
+        }
+      }
+    },
+    "Audio file is not readable: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio file is not readable: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音频文件无法读取：%@"
+          }
+        }
+      }
+    },
     "DatabaseManager audit runtime is unavailable" : {
       "localizations" : {
         "en" : {

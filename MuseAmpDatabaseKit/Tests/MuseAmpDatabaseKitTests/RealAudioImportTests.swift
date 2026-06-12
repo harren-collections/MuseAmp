@@ -102,7 +102,7 @@ private func makeSilentM4A(at url: URL) throws {
         AVEncoderBitRateKey: 64000,
     ]
     let format = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 1)!
-    let frameCount: AVAudioFrameCount = 44100
+    let frameCount: AVAudioFrameCount = 88200
     let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount)!
     buffer.frameLength = frameCount
 

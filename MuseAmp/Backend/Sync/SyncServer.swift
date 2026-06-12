@@ -121,16 +121,23 @@ final nonisolated class SyncServer: @unchecked Sendable {
 
     func stop() async {
         AppLog.info(self, "Sync server stopping")
-        listener?.stateUpdateHandler = nil
-        listener?.newConnectionHandler = nil
-        listener?.cancel()
-        listener = nil
+        // listener and connectionIDs are otherwise only touched by callbacks
+        // running on `queue`; hop there so stop cannot race them.
+        await withCheckedContinuation { continuation in
+            queue.async {
+                self.listener?.stateUpdateHandler = nil
+                self.listener?.newConnectionHandler = nil
+                self.listener?.cancel()
+                self.listener = nil
 
-        for connection in connectionIDs.values {
-            connection.cancel()
+                for connection in self.connectionIDs.values {
+                    connection.cancel()
+                }
+                self.connectionIDs.removeAll()
+                self.tokenStore.clear()
+                continuation.resume()
+            }
         }
-        connectionIDs.removeAll()
-        tokenStore.clear()
     }
 }
 

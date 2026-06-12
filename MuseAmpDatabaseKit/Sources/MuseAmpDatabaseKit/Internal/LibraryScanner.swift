@@ -13,6 +13,7 @@ struct LibraryScanner {
         let upserted: Int
         let deleted: Int
         let invalidRelativePaths: [String]
+        let transientFailureRelativePaths: [String]
     }
 
     let paths: LibraryPaths
@@ -58,6 +59,7 @@ struct LibraryScanner {
         var seenRelativePaths = Set<String>()
         var upserts: [AudioTrackRecord] = []
         var invalidRelativePaths: [String] = []
+        var transientFailureRelativePaths: [String] = []
 
         let totalFiles = audioFiles.count
         for (fileIndex, fileURL) in audioFiles.enumerated() {
@@ -139,13 +141,18 @@ struct LibraryScanner {
                 if let lyrics = metadata.lyrics.nilIfEmpty {
                     try? cacheCoordinator.writeLyrics(text: lyrics, trackID: trackID)
                 }
-            } catch {
-                DBLog.warning(logger, "LibraryScanner", "inspectAudioFile failed relativePath=\(relativePath) error=\(error.localizedDescription)")
+            } catch let error as AudioFileValidationError {
+                DBLog.warning(logger, "LibraryScanner", "audio file failed validation relativePath=\(relativePath) error=\(error.localizedDescription)")
                 invalidRelativePaths.append(relativePath)
                 if pruneInvalidFiles {
                     try? FileManager.default.removeItem(at: fileURL)
                     try? removeEmptyParentDirectory(for: fileURL)
                 }
+            } catch {
+                // Transient failure (I/O, file protection, cancellation): keep
+                // the file and any existing index row; a later rebuild retries.
+                DBLog.warning(logger, "LibraryScanner", "inspectAudioFile transient failure, keeping file relativePath=\(relativePath) error=\(error.localizedDescription)")
+                transientFailureRelativePaths.append(relativePath)
             }
         }
 
@@ -162,6 +169,7 @@ struct LibraryScanner {
             upserted: upserts.count,
             deleted: deletedPaths.count,
             invalidRelativePaths: invalidRelativePaths,
+            transientFailureRelativePaths: transientFailureRelativePaths,
         )
     }
 

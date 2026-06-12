@@ -10,7 +10,10 @@ struct SongLibraryIndexerTests {
     func `syncLibrary removes unreadable audio files from disk and index`() async throws {
         let sandbox = TestLibrarySandbox()
         let database = try sandbox.makeDatabase { _ in
-            throw NSError(domain: "test", code: 1, userInfo: [NSLocalizedDescriptionKey: "unreadable"])
+            // A deterministic validation failure is the only verdict that may
+            // prune files; generic errors are treated as transient and keep
+            // the file on disk.
+            throw AudioFileValidationError.notPlayable(reason: "unreadable")
         }
         let paths = database.paths
         let indexer = SongLibraryIndexer(databaseManager: database.databaseManager)

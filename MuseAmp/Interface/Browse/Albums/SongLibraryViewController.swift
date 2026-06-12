@@ -394,7 +394,10 @@ final class SongLibraryViewController: UIViewController {
             }
         case .recentlyModified:
             albums.sort {
-                $0.albumTitle.localizedCaseInsensitiveCompare($1.albumTitle) == .orderedAscending
+                let lhs = $0.latestModifiedAt ?? .distantPast
+                let rhs = $1.latestModifiedAt ?? .distantPast
+                if lhs != rhs { return lhs > rhs }
+                return $0.albumTitle.localizedCaseInsensitiveCompare($1.albumTitle) == .orderedAscending
             }
         case .trackCount:
             albums.sort {

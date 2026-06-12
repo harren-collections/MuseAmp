@@ -88,17 +88,7 @@ extension LyricTimelineView {
     }
 
     private func currentTimeline() -> LyricTimeline? {
-        let trackID = environment.playbackController.snapshot.currentTrack?.id
-        guard let trackID else { return nil }
-        let cached = environment.lyricsService.cachedLyrics(for: trackID)
-        guard let cached, !cached.isEmpty else { return nil }
-        let converted = if AppPreferences.isLyricsAutoConvertChineseEnabled {
-            LyricsChineseScriptConverter.convertToSystemScript(cached)
-        } else {
-            cached
-        }
-        let timeline = LyricTimeline(lrc: converted)
-        return timeline.lines.isEmpty ? nil : timeline
+        renderedTimeline
     }
 
     private func currentLyricLines() -> [String] {

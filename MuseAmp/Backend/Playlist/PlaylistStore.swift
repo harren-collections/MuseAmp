@@ -33,6 +33,13 @@ final class PlaylistStore {
 
     @discardableResult
     func createPlaylist(id: UUID = UUID(), name: String, coverImageData: Data? = nil) -> Playlist {
+        reload()
+        // importLegacyPlaylists is a destructive upsert that would wipe the
+        // entries of an existing playlist with the same ID; creating must
+        // never do that.
+        if let existing = playlist(for: id) {
+            return existing
+        }
         let previousPlaylists = playlists
         let candidate = Playlist(id: id, name: name, coverImageData: coverImageData)
         do {
@@ -167,10 +174,9 @@ final class PlaylistStore {
         playlist.songs[index] = song
         let previousPlaylists = playlists
         do {
-            _ = try send(.clearPlaylistEntries(playlistID: playlistID))
-            for entry in playlist.songs {
-                _ = try send(.addPlaylistEntry(entry, playlistID: playlistID))
-            }
+            // Single transactional replace: clear + per-entry re-add would
+            // permanently drop the tail of the playlist on a mid-loop failure.
+            _ = try send(.importLegacyPlaylists([playlist]))
         } catch {
             AppLog.error(
                 self,

@@ -44,6 +44,10 @@ final class LyricTimelineView: UIView {
     let bottomBlurView: EdgeFadeBlurView = .init(direction: .blurredBottomClearTop)
 
     private(set) var items: [Item] = []
+    /// The timeline the visible items were built from. Tap/seek actions must
+    /// use this exact instance: re-parsing lyrics from the cache can yield a
+    /// different line set than what is rendered, breaking index-based seeks.
+    var renderedTimeline: LyricTimeline?
 
     let environment: AppEnvironment
     var cancellables: Set<AnyCancellable> = []

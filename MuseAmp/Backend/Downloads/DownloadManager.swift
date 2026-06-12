@@ -301,6 +301,8 @@ final class DownloadManager {
         guard let task = tasks[trackID], task.state == .failed else { return }
         AppLog.info(self, "removeFailed trackID=\(trackID)")
         cleanupLocalAudioArtifacts(for: task)
+        intentionallyPaused.remove(trackID)
+        cellularAllowedTrackIDs.remove(trackID)
         tasks.removeValue(forKey: trackID)
         downloadStore.deleteRecords(trackIDs: [trackID])
         publishSnapshot()
@@ -309,8 +311,13 @@ final class DownloadManager {
     func cancelTask(trackID: String) {
         guard let task = tasks[trackID] else { return }
         AppLog.info(self, "cancelTask trackID=\(trackID) state=\(task.state)")
-        if task.state == .downloading, let url = task.url {
-            DiggerManager.shared.stopTask(for: url)
+        if let url = task.url {
+            // Digger's stopTask only suspends the URLSession task; a suspended
+            // seed would wedge a later re-download of the same URL. Cancel for
+            // real so the seed is torn down.
+            DiggerManager.shared.cancelTask(for: url)
+            hasMarkedDownloading.remove(url)
+            diggerStartedURLs.remove(url)
         }
         cleanupLocalAudioArtifacts(for: task)
         intentionallyPaused.remove(trackID)
