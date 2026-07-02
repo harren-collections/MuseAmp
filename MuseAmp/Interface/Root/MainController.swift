@@ -311,6 +311,11 @@ class MainController: UIViewController {
         let detailVC = PlaylistDetailViewController(playlistID: playlistID, environment: environment)
         let nav = UINavigationController(rootViewController: detailVC).then {
             $0.navigationBar.prefersLargeTitles = false
+            #if targetEnvironment(macCatalyst)
+                // Keep the bar in-content; toolbar hosting would resurrect an
+                // empty title bar above the full-bleed window content.
+                $0.navigationBar.preferredBehavioralStyle = .pad
+            #endif
         }
         playlistNavigationControllers[playlistID] = nav
         return nav
@@ -389,6 +394,9 @@ class MainController: UIViewController {
 
         let nav = UINavigationController(rootViewController: rootVC).then {
             $0.navigationBar.prefersLargeTitles = destination != .search
+            #if targetEnvironment(macCatalyst)
+                $0.navigationBar.preferredBehavioralStyle = .pad
+            #endif
         }
         contentNavigationControllers[destination] = nav
         return nav

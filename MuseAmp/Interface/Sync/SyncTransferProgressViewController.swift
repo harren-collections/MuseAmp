@@ -22,6 +22,7 @@ final class SyncTransferProgressViewController: StackScrollController {
     let session: SyncTransferSession
     let endpoint: SyncEndpoint
     let token: String
+    let screenAwakeCoordinator: ScreenAwakeCoordinator
 
     private var phase: Phase = .fetchingManifest
     private var transferTask: Task<Void, Never>?
@@ -37,10 +38,12 @@ final class SyncTransferProgressViewController: StackScrollController {
         session: SyncTransferSession,
         endpoint: SyncEndpoint,
         token: String,
+        screenAwakeCoordinator: ScreenAwakeCoordinator,
     ) {
         self.session = session
         self.endpoint = endpoint
         self.token = token
+        self.screenAwakeCoordinator = screenAwakeCoordinator
         super.init(nibName: nil, bundle: nil)
         title = String(localized: "Transferring")
     }
@@ -67,12 +70,12 @@ final class SyncTransferProgressViewController: StackScrollController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        UIApplication.shared.isIdleTimerDisabled = true
+        screenAwakeCoordinator.acquire(.syncSession)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        UIApplication.shared.isIdleTimerDisabled = false
+        screenAwakeCoordinator.release(.syncSession)
     }
 
     override func setupContentViews() {

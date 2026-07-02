@@ -201,7 +201,6 @@ class SearchViewController: UIViewController {
                         )
                     },
                 )
-                cell.accessoryView = makeSongMenuButton(for: song)
             }
             cell.accessibilityIdentifier = "search.result.songs.\(indexPath.row)"
             return cell
@@ -268,7 +267,6 @@ class SearchViewController: UIViewController {
                         )
                     },
                 )
-                cell.accessoryView = makeMenuButton(menu: buildLyricsMatchMenu(for: track))
             }
             cell.accessibilityIdentifier = "search.result.lyrics.\(indexPath.row)"
             return cell
@@ -337,23 +335,5 @@ class SearchViewController: UIViewController {
         } else {
             tableView.backgroundView = nil
         }
-    }
-
-    func makeSongMenuButton(for song: CatalogSong) -> UIButton {
-        makeMenuButton(menu: buildSongMenu(for: song))
-    }
-
-    func makeMenuButton(menu: UIMenu) -> UIButton {
-        let button = UIButton(type: .system)
-        var configuration = UIButton.Configuration.plain()
-        configuration.image = UIImage(systemName: "ellipsis.circle")
-        configuration.baseForegroundColor = .secondaryLabel
-        configuration.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
-        button.configuration = configuration
-        button.menu = menu
-        button.showsMenuAsPrimaryAction = true
-        button.accessibilityLabel = String(localized: "More Actions")
-        button.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
-        return button
     }
 }

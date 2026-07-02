@@ -78,6 +78,13 @@ extension MainController {
         rootSplitViewController.navigationItem.leftBarButtonItem = nil
         sidebarViewController.navigationItem.leftBarButtonItem = nil
         rootSplitViewController.displayModeButtonVisibility = .never
+
+        #if targetEnvironment(macCatalyst)
+            // Keep the split view's column bars in-content instead of hosted
+            // in an NSToolbar, so the hidden title bar fully collapses and
+            // only the traffic lights float over the content.
+            sidebarViewController.navigationController?.navigationBar.preferredBehavioralStyle = .pad
+        #endif
     }
 
     func teardownRelaxedLayout() {

@@ -3363,22 +3363,6 @@
         }
       }
     },
-    "More Actions" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "More Actions"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "更多操作"
-          }
-        }
-      }
-    },
     "Move \"%@\" out of this playlist?" : {
       "localizations" : {
         "en" : {

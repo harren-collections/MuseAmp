@@ -49,6 +49,8 @@ class NowPlayingCompactController: UIViewController, NowPlayingQueueShellControl
     var lastPresentedArtworkURL: URL?
     var currentPlaybackSnapshot = PlaybackSnapshot.empty
     private(set) var isInterfaceSuspended = false
+    private var isNowPlayingSurfaceVisible = false
+    private var isHoldingLyricsScreenAwake = false
 
     init(environment: AppEnvironment) {
         self.environment = environment
@@ -103,6 +105,22 @@ class NowPlayingCompactController: UIViewController, NowPlayingQueueShellControl
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        isNowPlayingSurfaceVisible = true
+        refreshLyricsScreenAwakeHold()
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        isNowPlayingSurfaceVisible = false
+        refreshLyricsScreenAwakeHold()
+    }
+
+    func refreshLyricsScreenAwakeHold() {
+        updateLyricsScreenAwakeHold(
+            shouldHold: isNowPlayingSurfaceVisible
+                && controlIslandViewModel.selectedContentSelector == .lyrics,
+            isHoldingScreenAwake: &isHoldingLyricsScreenAwake,
+        )
     }
 
     override func viewDidLayoutSubviews() {
