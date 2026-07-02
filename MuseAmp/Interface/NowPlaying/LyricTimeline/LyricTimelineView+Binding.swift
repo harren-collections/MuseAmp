@@ -16,25 +16,23 @@ extension LyricTimelineView {
 
     func bindDataSource() {
         let lyricsService = environment.lyricsService
-        let currentTrackIDPublisher = environment.playbackController.$snapshot
-            .map(\.currentTrack?.id)
-            .share()
         let lyricsReloadPublisher = NotificationCenter.default.publisher(for: .lyricsDidUpdate)
-            .map { ($0.userInfo?[AppNotificationUserInfoKey.trackIDs] as? [String]) ?? [] }
-            .combineLatest(currentTrackIDPublisher)
-            .compactMap { [weak self] (trackIDs: [String], currentTrackID: String?) -> String? in
-                guard let currentTrackID, trackIDs.contains(currentTrackID) else {
+            .receive(on: DispatchQueue.main)
+            .compactMap { [weak self] notification -> String? in
+                guard let self else { return nil }
+                let trackIDs = (notification.userInfo?[AppNotificationUserInfoKey.trackIDs] as? [String]) ?? []
+                guard let currentTrackID = environment.playbackController.snapshot.currentTrack?.id,
+                      trackIDs.contains(currentTrackID)
+                else {
                     return nil
                 }
-                AppLog.info(
-                    self ?? "LyricTimelineView",
-                    "lyricsDidUpdate matched current track trackID=\(currentTrackID)",
-                )
+                AppLog.info(self, "lyricsDidUpdate matched current track trackID=\(currentTrackID)")
                 return currentTrackID
             }
             .map(Optional.some)
 
-        let phase = currentTrackIDPublisher
+        let phase = environment.playbackController.$snapshot
+            .map(\.currentTrack?.id)
             .removeDuplicates()
             .merge(with: lyricsReloadPublisher)
             .map { [weak self] trackID -> AnyPublisher<LyricsPhase, Never> in
