@@ -78,3 +78,5 @@ make validate-xcstrings
 Muse Amp is licensed under the MIT License. See `LICENSE` for details.
 
 The repository bundles third-party dependencies whose notices are collected in `MuseAmp/Resources/OpenSourceLicenses.md` and `MuseAmpTV/Resources/OpenSourceLicenses.md`.
+
+<img src="./Artworks/fable5.jpg" alt="Fable 5 Verified" width="240">
