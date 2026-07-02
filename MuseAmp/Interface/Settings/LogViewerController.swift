@@ -46,7 +46,7 @@ final class LogViewerController: UIViewController, UITableViewDataSource, UITabl
         }
     }
 
-    private let tableView = UITableView(frame: .zero, style: .plain)
+    private let tableView = UITableView(frame: UIScreen.main.bounds, style: .plain)
     private let searchController = UISearchController(searchResultsController: nil)
 
     private var allLines: [LogLine] = []

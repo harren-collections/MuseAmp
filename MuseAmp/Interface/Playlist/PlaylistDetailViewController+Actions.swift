@@ -150,6 +150,19 @@ extension PlaylistDetailViewController {
         }
     }
 
+    func confirmRemoveDuplicateSongs() {
+        let duplicateCount = store.duplicateSongCount(in: playlistID)
+        guard duplicateCount > 0 else { return }
+        presentConfirmationAlert(
+            title: String(localized: "Remove Duplicates"),
+            message: String(localized: "Remove \(duplicateCount) duplicate songs from this playlist? The first added copy of each song is kept."),
+            confirmTitle: String(localized: "Remove"),
+        ) { [weak self] in
+            guard let self else { return }
+            store.removeDuplicateSongs(in: playlistID)
+        }
+    }
+
     func removeSongFromPlaylist(_ song: PlaylistEntry) {
         let currentSongs = playlist?.songs ?? []
         guard let currentIndex = currentSongs.firstIndex(where: { $0.entryID == song.entryID }) else {

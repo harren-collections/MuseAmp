@@ -77,7 +77,10 @@ extension LyricTimelineView: UITableViewDataSource, UITableViewDelegate {
         contextMenuConfigurationForRowAt indexPath: IndexPath,
         point _: CGPoint,
     ) -> UIContextMenuConfiguration? {
-        guard case .line = items[indexPath.row] else { return nil }
+        switch items[indexPath.row] {
+        case .line, .staticLine: break
+        case .spacer, .message: return nil
+        }
         interactionSubject.send()
         return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
             self?.makeLineContextMenu(at: indexPath.row)

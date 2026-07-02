@@ -63,7 +63,7 @@ final class SongsViewController: UIViewController {
     }
 
     let environment: AppEnvironment
-    let tableView = UITableView(frame: .zero, style: .plain)
+    let tableView = UITableView(frame: UIScreen.main.bounds, style: .plain)
     var dataSource: UITableViewDiffableDataSource<SongsSection, SongsItem>!
     var allTracks: [AudioTrackRecord] = []
     var tracksByID: [String: AudioTrackRecord] = [:]

@@ -16,7 +16,7 @@ class NowPlayingAvatarSectionView: UIView {
 
     init(environment: AppEnvironment) {
         artworkView = NowPlayingArtworkImageView(environment: environment)
-        super.init(frame: .zero)
+        super.init(frame: UIScreen.main.bounds)
 
         artworkView.configure(
             placeholder: "music.note",
@@ -41,7 +41,7 @@ private final class NowPlayingArtworkImageView: MuseAmpImageView {
     private var cancellables = Set<AnyCancellable>()
 
     init(environment: AppEnvironment) {
-        super.init(frame: .zero)
+        super.init(frame: UIScreen.main.bounds)
         environment.playbackController.$snapshot
             .map { $0.currentTrack?.artworkURL }
             .removeDuplicates { $0 == $1 }

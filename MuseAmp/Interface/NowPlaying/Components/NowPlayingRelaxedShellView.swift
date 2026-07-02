@@ -50,7 +50,7 @@ class NowPlayingRelaxedShellView: UIView {
         self.leftContentView = leftContentView
         self.lyricsPanelView = lyricsPanelView
         self.queuePanelView = queuePanelView
-        super.init(frame: .zero)
+        super.init(frame: UIScreen.main.bounds)
         backgroundColor = .clear
         setupViewHierarchy()
         setupLayout()

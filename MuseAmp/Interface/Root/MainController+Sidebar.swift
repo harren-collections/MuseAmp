@@ -191,7 +191,7 @@ final class SidebarViewController: UIViewController {
             return NSCollectionLayoutSection.list(using: configuration, layoutEnvironment: layoutEnvironment)
         }
 
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout).then {
+        collectionView = UICollectionView(frame: UIScreen.main.bounds, collectionViewLayout: layout).then {
             $0.backgroundColor = .clear
             $0.delegate = self
         }

@@ -18,7 +18,7 @@ final class LyricSelectionSheetViewController: UIViewController {
 
     private let lyrics: [String]
     private let initialActiveIndex: Int?
-    private let tableView = UITableView(frame: .zero, style: .plain).then {
+    private let tableView = UITableView(frame: UIScreen.main.bounds, style: .plain).then {
         $0.backgroundColor = .clear
         $0.separatorStyle = .none
         $0.rowHeight = UITableView.automaticDimension

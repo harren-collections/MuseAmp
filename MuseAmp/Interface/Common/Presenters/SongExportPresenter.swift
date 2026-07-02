@@ -46,8 +46,8 @@ final class SongExportPresenter {
             title: String(localized: "Preparing"),
             message: String(localized: "Preparing files..."),
         )
-        viewController.present(progressAlert, animated: true) {
-            Task { @MainActor [weak viewController] in
+        viewController.present(progressAlert, animated: true) { [weak viewController] in
+            Task { @MainActor in
                 guard let viewController else {
                     return
                 }
@@ -109,8 +109,8 @@ final class SongExportPresenter {
             title: String(localized: "Preparing"),
             message: String(localized: "Extracting lyrics..."),
         )
-        viewController.present(progressAlert, animated: true) {
-            Task { @MainActor [weak viewController] in
+        viewController.present(progressAlert, animated: true) { [weak viewController] in
+            Task { @MainActor in
                 guard let viewController else { return }
 
                 do {

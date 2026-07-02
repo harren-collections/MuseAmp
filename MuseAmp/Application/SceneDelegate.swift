@@ -38,9 +38,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         #if targetEnvironment(macCatalyst)
             if let titlebar = windowScene.titlebar {
                 titlebar.titleVisibility = .hidden
-                let toolbar = NSToolbar(identifier: "main")
-                toolbar.displayMode = .default
-                titlebar.toolbar = toolbar
+                titlebar.toolbar = nil
             }
             windowScene.sizeRestrictions?.minimumSize = CGSize(width: 800, height: 650)
         #endif

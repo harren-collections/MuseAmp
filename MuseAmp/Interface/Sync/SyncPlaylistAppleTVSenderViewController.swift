@@ -103,12 +103,12 @@ final class SyncPlaylistAppleTVSenderViewController: StackScrollController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        UIApplication.shared.isIdleTimerDisabled = true
+        environment.screenAwakeCoordinator.acquire(.syncSession)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        UIApplication.shared.isIdleTimerDisabled = false
+        environment.screenAwakeCoordinator.release(.syncSession)
         if isMovingFromParent {
             startupTask?.cancel()
             startupTask = nil

@@ -16,14 +16,16 @@ import UIKit
 nonisolated enum SearchSection: Hashable {
     case albums
     case songs
+    case lyrics
     case loading
 
-    static let resultSections: [SearchSection] = [.albums, .songs]
+    static let resultSections: [SearchSection] = [.albums, .songs, .lyrics]
 }
 
 nonisolated enum SearchItem: Hashable {
     case song(String)
     case album(String)
+    case lyricsMatch(String)
     case showMore(SearchSection)
     case loadingIndicator
 }
@@ -34,11 +36,12 @@ class SearchViewController: UIViewController {
 
     let environment: AppEnvironment
     let searchController = UISearchController(searchResultsController: nil)
-    let tableView = UITableView(frame: .zero, style: .plain)
+    let tableView = UITableView(frame: UIScreen.main.bounds, style: .plain)
     let apiClient: APIClient
 
     let songPageSize = 10
     let mediaPageSize = 5
+    let lyricsPageSize = 20
 
     var searchState = SearchResultsState()
     var searchTask: Task<Void, Never>?
@@ -64,9 +67,13 @@ class SearchViewController: UIViewController {
         environment: environment,
         viewController: self,
     )
+    lazy var lyricsSearchService = LyricsSearchService(
+        database: environment.libraryDatabase,
+        lyricsCacheStore: environment.lyricsCacheStore,
+    )
 
     let historyStore = SearchHistoryStore()
-    let historyTableView = UITableView(frame: .zero, style: .plain)
+    let historyTableView = UITableView(frame: UIScreen.main.bounds, style: .plain)
     var searchHistory: [String] = []
 
     lazy var diffableDataSource: UITableViewDiffableDataSource<SearchSection, SearchItem> = {
@@ -117,7 +124,7 @@ class SearchViewController: UIViewController {
     private func configureSearchController() {
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = String(localized: "Songs, Albums")
+        searchController.searchBar.placeholder = String(localized: "Songs, Albums, Lyrics")
         searchController.searchBar.accessibilityIdentifier = "search.bar"
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
@@ -194,7 +201,6 @@ class SearchViewController: UIViewController {
                         )
                     },
                 )
-                cell.accessoryView = makeSongMenuButton(for: song)
             }
             cell.accessibilityIdentifier = "search.result.songs.\(indexPath.row)"
             return cell
@@ -231,6 +237,39 @@ class SearchViewController: UIViewController {
             }
             cell.accessibilityIdentifier = "search.result.albums.\(indexPath.row)"
             return cell
+        case let .lyricsMatch(id):
+            let cell = tableView.dequeueReusableCell(withIdentifier: AmSongCell.reuseID, for: indexPath) as! AmSongCell
+            if let match = searchState.lyricsMatches.first(where: { $0.track.trackID == id }) {
+                let track = match.track
+                let title = track.title.sanitizedTrackTitle
+                let subtitle = [match.matchedLine, track.artistName]
+                    .filter { !$0.isEmpty }
+                    .joined(separator: " · ")
+                let artworkFileURL = environment.paths.artworkCacheURL(for: track.trackID)
+                let artworkURL = FileManager.default.fileExists(atPath: artworkFileURL.path) ? artworkFileURL : nil
+                cell.configure(
+                    content: SongRowContent(
+                        title: title,
+                        subtitle: subtitle.nilIfEmpty,
+                        trailingText: track.durationSeconds > 0
+                            ? formattedDuration(millis: Int((track.durationSeconds * 1000).rounded()))
+                            : nil,
+                        artworkURL: artworkURL,
+                    ),
+                )
+                cell.setAttributedSubtitle(
+                    subtitle.nilIfEmpty.map {
+                        SearchHighlightHelper.attributedString(
+                            text: $0,
+                            query: searchState.currentQuery,
+                            font: .systemFont(ofSize: 13),
+                            color: PlatformInterfacePalette.secondaryText,
+                        )
+                    },
+                )
+            }
+            cell.accessibilityIdentifier = "search.result.lyrics.\(indexPath.row)"
+            return cell
         case let .showMore(section):
             let cell = tableView.dequeueReusableCell(withIdentifier: ShowMoreCell.reuseID, for: indexPath) as! ShowMoreCell
             cell.configure(isLoading: searchState.loadingMore.contains(section))
@@ -259,6 +298,12 @@ class SearchViewController: UIViewController {
                     snapshot.appendSections([.songs])
                     snapshot.appendItems(searchState.songs.items.map { .song($0.id) }, toSection: .songs)
                     if searchState.songs.hasMore { snapshot.appendItems([.showMore(.songs)], toSection: .songs) }
+                case .lyrics where !searchState.lyricsMatches.isEmpty:
+                    snapshot.appendSections([.lyrics])
+                    snapshot.appendItems(
+                        searchState.lyricsMatches.map { .lyricsMatch($0.track.trackID) },
+                        toSection: .lyrics,
+                    )
                 case .loading:
                     break
                 default: break
@@ -290,19 +335,5 @@ class SearchViewController: UIViewController {
         } else {
             tableView.backgroundView = nil
         }
-    }
-
-    func makeSongMenuButton(for song: CatalogSong) -> UIButton {
-        let button = UIButton(type: .system)
-        var configuration = UIButton.Configuration.plain()
-        configuration.image = UIImage(systemName: "ellipsis.circle")
-        configuration.baseForegroundColor = .secondaryLabel
-        configuration.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
-        button.configuration = configuration
-        button.menu = buildSongMenu(for: song)
-        button.showsMenuAsPrimaryAction = true
-        button.accessibilityLabel = String(localized: "More Actions")
-        button.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
-        return button
     }
 }

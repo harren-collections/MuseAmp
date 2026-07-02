@@ -9,6 +9,14 @@ import AVFoundation
 
 @MainActor
 final class AudioSessionManager {
+    /// `AVAudioSession.setActive` blocks while the system negotiates the
+    /// session, so activation runs on this serial queue instead of the main
+    /// thread. Serial ordering keeps activate/deactivate pairs in sequence.
+    private static let sessionQueue = DispatchQueue(
+        label: "MuseAmpPlayerKit.AudioSessionManager",
+        qos: .userInitiated,
+    )
+
     private let logger: any MusicPlayerLogger
     private var interruptionObserver: (any NSObjectProtocol)?
     private var routeChangeObserver: (any NSObjectProtocol)?
@@ -102,16 +110,38 @@ final class AudioSessionManager {
 
     func activate() {
         #if os(iOS) || os(tvOS) || os(watchOS)
-            try? AVAudioSession.sharedInstance().setActive(true)
+            let logger = logger
+            Self.sessionQueue.async {
+                do {
+                    try AVAudioSession.sharedInstance().setActive(true)
+                } catch {
+                    logger.log(
+                        level: .warning,
+                        component: "AudioSessionManager",
+                        message: "failed to activate audio session error=\(error.localizedDescription)",
+                    )
+                }
+            }
         #endif
     }
 
     func deactivate() {
         #if os(iOS) || os(tvOS) || os(watchOS)
-            try? AVAudioSession.sharedInstance().setActive(
-                false,
-                options: .notifyOthersOnDeactivation,
-            )
+            let logger = logger
+            Self.sessionQueue.async {
+                do {
+                    try AVAudioSession.sharedInstance().setActive(
+                        false,
+                        options: .notifyOthersOnDeactivation,
+                    )
+                } catch {
+                    logger.log(
+                        level: .warning,
+                        component: "AudioSessionManager",
+                        message: "failed to deactivate audio session error=\(error.localizedDescription)",
+                    )
+                }
+            }
         #endif
     }
 

@@ -38,7 +38,7 @@ final class TVLyricTimelineView: UIView {
     }
 
     private let tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .plain)
+        let tableView = UITableView(frame: UIScreen.main.bounds, style: .plain)
         tableView.backgroundColor = .clear
         tableView.showsVerticalScrollIndicator = false
         tableView.contentInsetAdjustmentBehavior = .never

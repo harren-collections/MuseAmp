@@ -71,12 +71,12 @@ final class SyncServerStatusViewController: StackScrollController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        UIApplication.shared.isIdleTimerDisabled = true
+        environment.screenAwakeCoordinator.acquire(.syncSession)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        UIApplication.shared.isIdleTimerDisabled = false
+        environment.screenAwakeCoordinator.release(.syncSession)
         if isMovingFromParent {
             startupTask?.cancel()
             startupTask = nil
@@ -427,9 +427,9 @@ private extension SyncServerStatusViewController {
         let alert = AlertViewController(
             title: String(localized: "Transfer Failed"),
             message: message,
-        ) { context in
+        ) { [weak self] context in
             context.addAction(title: String(localized: "OK"), attribute: .accent) {
-                context.dispose { [weak self] in
+                context.dispose {
                     self?.navigationController?.popViewController(animated: true)
                 }
             }

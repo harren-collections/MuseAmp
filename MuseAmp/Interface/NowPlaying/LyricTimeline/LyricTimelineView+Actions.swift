@@ -21,56 +21,39 @@ extension LyricTimelineView {
     }
 
     func makeLineContextMenu(at row: Int) -> UIMenu? {
-        guard case let .line(index, _, _) = items[row] else { return nil }
+        let lineIndex: Int
+        let lineText: String
+        var lineTime: TimeInterval?
+        var allowedInteractionTypes: Set<LyricLineMenuProvider.InteractionType> = [
+            .copyLine, .copyAllLyrics, .selectAndCopy,
+        ]
 
-        var playFromHereActions: [UIAction] = []
-        if let timeline = currentTimeline(), timeline.lines.indices.contains(index) {
-            let time = timeline.lines[index].time
-            let formatted = Self.formatTimestamp(time)
-            playFromHereActions.append(
-                UIAction(
-                    title: String(localized: "Play from Here"),
-                    subtitle: formatted,
-                    image: UIImage(systemName: "play.fill"),
-                ) { [weak self] _ in
-                    self?.environment.playbackController.seek(to: time)
-                    self?.environment.playbackController.play()
-                },
-            )
-        }
-
-        let allLines = currentLyricLines()
-        let activeIndex = items.firstIndex(where: {
-            if case let .line(_, _, isActive) = $0 { return isActive }
-            return false
-        }).flatMap { row -> Int? in
-            if case let .line(idx, _, _) = items[row] { return idx }
+        switch items[row] {
+        case let .line(index, text, _):
+            lineIndex = index
+            lineText = text
+            if let timeline = currentTimeline(), timeline.lines.indices.contains(index) {
+                lineTime = timeline.lines[index].time
+                allowedInteractionTypes.insert(.playFromLine)
+            }
+        case let .staticLine(index, text):
+            lineIndex = index
+            lineText = text
+        case .spacer, .message:
             return nil
         }
 
-        let copy = UIAction(
-            title: String(localized: "Copy"),
-            image: UIImage(systemName: "doc.on.doc"),
-        ) { _ in
-            UIPasteboard.general.string = allLines.joined(separator: "\n")
-            #if os(iOS)
-                UINotificationFeedbackGenerator().notificationOccurred(.success)
-            #endif
-        }
-
-        let selectCopy = UIAction(
-            title: String(localized: "Select & Copy"),
-            image: UIImage(systemName: "text.badge.checkmark"),
-        ) { [weak self] _ in
-            self?.presentLyricSelectionSheet(lyrics: allLines, activeIndex: activeIndex)
-        }
-
-        let playSection = UIMenu(options: .displayInline, children: playFromHereActions)
-        let copySection = UIMenu(options: .displayInline, children: [copy, selectCopy])
-        return UIMenu(children: [playSection, copySection])
+        let selection = makeSelectionContext(preferredLineIndex: lineIndex)
+        return lineMenuProvider.menu(context: .init(
+            allowedInteractionTypes: allowedInteractionTypes,
+            lineText: lineText,
+            lineTime: lineTime,
+            allLines: selection.lines,
+            selectedLineIndex: selection.selectedIndex,
+        ))
     }
 
-    private func presentLyricSelectionSheet(lyrics: [String], activeIndex: Int?) {
+    func presentLyricSelectionSheet(lyrics: [String], activeIndex: Int?) {
         guard !lyrics.isEmpty else { return }
         guard let viewController = sequence(first: self as UIResponder, next: \.next)
             .compactMap({ $0 as? UIViewController })
@@ -91,18 +74,37 @@ extension LyricTimelineView {
         renderedTimeline
     }
 
-    private func currentLyricLines() -> [String] {
-        items.compactMap {
-            if case let .line(_, text, _) = $0 { return text }
-            return nil
-        }.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
+    private struct LyricSelectionContext {
+        let lines: [String]
+        let selectedIndex: Int?
     }
 
-    nonisolated static func formatTimestamp(_ seconds: TimeInterval) -> String {
-        let total = max(0, Int(seconds))
-        let m = total / 60
-        let s = total % 60
-        return String(format: "%d:%02d", m, s)
+    /// Builds the non-empty lyric lines handed to the selection sheet, tracking
+    /// where `preferredLineIndex` lands after empty lines are filtered out so the
+    /// sheet pre-selects the pressed line, not a shifted one.
+    private func makeSelectionContext(preferredLineIndex: Int?) -> LyricSelectionContext {
+        var lines: [String] = []
+        var selectedIndex: Int?
+        for item in items {
+            let lineIndex: Int
+            let rawText: String
+            switch item {
+            case let .line(index, text, _):
+                lineIndex = index
+                rawText = text
+            case let .staticLine(index, text):
+                lineIndex = index
+                rawText = text
+            case .spacer, .message:
+                continue
+            }
+            let text = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !text.isEmpty else { continue }
+            if lineIndex == preferredLineIndex {
+                selectedIndex = lines.count
+            }
+            lines.append(text)
+        }
+        return LyricSelectionContext(lines: lines, selectedIndex: selectedIndex)
     }
 }

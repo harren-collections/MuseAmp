@@ -92,6 +92,8 @@ final class PlaylistContextMenuProvider {
                 sections.append(primarySection)
             }
 
+            var organizeElements: [UIMenuElement] = []
+
             let mergeTargets = playlistStore.playlists.filter { $0.id != playlist.id }
             if !playlist.songs.isEmpty, !mergeTargets.isEmpty {
                 let mergeActions: [UIAction] = mergeTargets.map { target in
@@ -103,14 +105,24 @@ final class PlaylistContextMenuProvider {
                         self?.playlistStore.mergeSongs(from: playlist.id, into: target.id)
                     }
                 }
-                let mergeMenu = UIMenu(
+                organizeElements.append(UIMenu(
                     title: String(localized: "Merge Into…"),
                     image: UIImage(systemName: "arrow.triangle.merge"),
                     children: mergeActions,
-                )
-                if let mergeSection = MenuSectionProvider.inline([mergeMenu]) {
-                    sections.append(mergeSection)
-                }
+                ))
+            }
+
+            if playlistStore.duplicateSongCount(in: playlist.id) > 0 {
+                organizeElements.append(UIAction(
+                    title: String(localized: "Remove Duplicates"),
+                    image: UIImage(systemName: "rectangle.stack.badge.minus"),
+                ) { [weak self] _ in
+                    self?.presentRemoveDuplicatesAlert(playlistProvider: playlistProvider)
+                })
+            }
+
+            if let organizeSection = MenuSectionProvider.inline(organizeElements) {
+                sections.append(organizeSection)
             }
 
             if let copySection = MenuSectionProvider.inline([makeCopyMenu(for: playlist)]) {
@@ -198,6 +210,24 @@ final class PlaylistContextMenuProvider {
         ) { [weak self] in
             self?.playlistStore.deletePlaylist(id: playlist.id)
             onDelete?(playlist)
+        }
+    }
+
+    private func presentRemoveDuplicatesAlert(playlistProvider: @escaping () -> Playlist?) {
+        guard let viewController, let playlist = playlistProvider() else {
+            return
+        }
+
+        let duplicateCount = playlistStore.duplicateSongCount(in: playlist.id)
+        guard duplicateCount > 0 else { return }
+
+        ConfirmationAlertPresenter.present(
+            on: viewController,
+            title: String(localized: "Remove Duplicates"),
+            message: String(localized: "Remove \(duplicateCount) duplicate songs from \"\(playlist.name)\"? The first added copy of each song is kept."),
+            confirmTitle: String(localized: "Remove"),
+        ) { [weak self] in
+            self?.playlistStore.removeDuplicateSongs(in: playlist.id)
         }
     }
 

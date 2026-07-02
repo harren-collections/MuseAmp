@@ -6,7 +6,7 @@ class MediaDetailViewController: UIViewController {
     let tableView: UITableView
 
     init(tableStyle: UITableView.Style) {
-        tableView = UITableView(frame: .zero, style: tableStyle)
+        tableView = UITableView(frame: UIScreen.main.bounds, style: tableStyle)
         super.init(nibName: nil, bundle: nil)
     }
 

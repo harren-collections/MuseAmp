@@ -46,6 +46,15 @@ extension NowPlayingLifecycleShellController where Self: UIViewController {
         refreshPlayingContent(animated: false)
     }
 
+    func updateLyricsScreenAwakeHold(
+        shouldHold: Bool,
+        isHoldingScreenAwake: inout Bool,
+    ) {
+        guard shouldHold != isHoldingScreenAwake else { return }
+        isHoldingScreenAwake = shouldHold
+        environment.screenAwakeCoordinator.setActive(shouldHold, for: .lyricsVisible)
+    }
+
     func prepareForPopupPresentation(additionalUpdates: () -> Void = {}) {
         AppLog.info(self, "prepareForPopupOpen isPlaying=\(currentPlaybackSnapshot.state == .playing)")
         loadViewIfNeeded()

@@ -61,7 +61,11 @@ struct PlaybackQueue {
 
     // MARK: - Load / Clear
 
-    mutating func load(items: [PlayerItem], startIndex: Int, shuffle: Bool) {
+    /// Load a fresh queue. A non-nil `startIndex` means the caller picked a
+    /// specific track: it plays first even when shuffling. A nil `startIndex`
+    /// means no specific track was chosen: shuffle produces a fully random
+    /// order (first track included), non-shuffle starts at the first item.
+    mutating func load(items: [PlayerItem], startIndex: Int?, shuffle: Bool) {
         guard !items.isEmpty else {
             clear()
             return
@@ -70,7 +74,7 @@ struct PlaybackQueue {
         self.items = items
         playedIndices = []
 
-        let clampedStart = min(max(startIndex, 0), items.count - 1)
+        let clampedStart = startIndex.map { min(max($0, 0), items.count - 1) }
 
         if shuffle {
             shuffled = true
@@ -79,7 +83,7 @@ struct PlaybackQueue {
         } else {
             shuffled = false
             shufflePermutation = []
-            currentIndex = clampedStart
+            currentIndex = clampedStart ?? 0
         }
     }
 

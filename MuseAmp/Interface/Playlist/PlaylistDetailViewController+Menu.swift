@@ -84,7 +84,7 @@ extension PlaylistDetailViewController {
             sections.append(refreshSection)
         }
 
-        if let organizeSection = MenuSectionProvider.inline([
+        var organizeActions: [UIMenuElement] = [
             UIAction(
                 title: isEditing ? String(localized: "Done") : String(localized: "Reorder Songs"),
                 image: UIImage(systemName: isEditing ? "checkmark" : "arrow.up.arrow.down"),
@@ -93,7 +93,18 @@ extension PlaylistDetailViewController {
                 setEditing(!isEditing, animated: true)
                 updateOptionsMenu()
             },
-        ]) {
+        ]
+
+        if store.duplicateSongCount(in: playlistID) > 0 {
+            organizeActions.append(UIAction(
+                title: String(localized: "Remove Duplicates"),
+                image: UIImage(systemName: "rectangle.stack.badge.minus"),
+            ) { [weak self] _ in
+                self?.confirmRemoveDuplicateSongs()
+            })
+        }
+
+        if let organizeSection = MenuSectionProvider.inline(organizeActions) {
             sections.append(organizeSection)
         }
 

@@ -75,6 +75,8 @@ class NowPlayingRelaxedController: UIViewController, NowPlayingQueueShellControl
     var lastPresentedArtworkURL: URL?
     var currentPlaybackSnapshot = PlaybackSnapshot.empty
     private(set) var isInterfaceSuspended = false
+    private var isNowPlayingSurfaceVisible = false
+    private var isHoldingLyricsScreenAwake = false
 
     // MARK: - Lifecycle
 
@@ -103,6 +105,25 @@ class NowPlayingRelaxedController: UIViewController, NowPlayingQueueShellControl
         applyInitialPlaybackPresentation()
         bindPlaybackSnapshot()
         bindPlaybackTime()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        isNowPlayingSurfaceVisible = true
+        refreshLyricsScreenAwakeHold()
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        isNowPlayingSurfaceVisible = false
+        refreshLyricsScreenAwakeHold()
+    }
+
+    private func refreshLyricsScreenAwakeHold() {
+        updateLyricsScreenAwakeHold(
+            shouldHold: isNowPlayingSurfaceVisible && currentRightPanel == .lyrics,
+            isHoldingScreenAwake: &isHoldingLyricsScreenAwake,
+        )
     }
 
     override func viewDidLayoutSubviews() {
@@ -201,6 +222,7 @@ class NowPlayingRelaxedController: UIViewController, NowPlayingQueueShellControl
     func switchRightPanel(to panel: NowPlayingRelaxedPanel, animated: Bool) {
         guard panel != currentRightPanel else { return }
         currentRightPanel = panel
+        refreshLyricsScreenAwakeHold()
 
         switch panel {
         case .lyrics:

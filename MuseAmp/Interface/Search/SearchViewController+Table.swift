@@ -59,6 +59,8 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
             title = String(localized: "Albums")
         case .songs:
             title = String(localized: "Songs")
+        case .lyrics:
+            title = String(localized: "Lyrics")
         case .loading:
             return nil
         }
@@ -97,6 +99,9 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
         case let .song(id):
             guard let song = searchState.songs.items.first(where: { $0.id == id }) else { return }
             openAlbumForSong(song)
+        case let .lyricsMatch(id):
+            guard let match = searchState.lyricsMatches.first(where: { $0.track.trackID == id }) else { return }
+            playLyricsMatch(match)
         }
     }
 
@@ -106,14 +111,23 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
         point _: CGPoint,
     ) -> UIContextMenuConfiguration? {
         guard tableView === self.tableView,
-              let item = diffableDataSource.itemIdentifier(for: indexPath),
-              case let .song(id) = item,
-              let song = searchState.songs.items.first(where: { $0.id == id })
+              let item = diffableDataSource.itemIdentifier(for: indexPath)
         else {
             return nil
         }
-        return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
-            self?.buildSongMenu(for: song)
+        switch item {
+        case let .song(id):
+            guard let song = searchState.songs.items.first(where: { $0.id == id }) else { return nil }
+            return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
+                self?.buildSongMenu(for: song)
+            }
+        case let .lyricsMatch(id):
+            guard let match = searchState.lyricsMatches.first(where: { $0.track.trackID == id }) else { return nil }
+            return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
+                self?.buildLyricsMatchMenu(for: match.track)
+            }
+        case .album, .showMore, .loadingIndicator:
+            return nil
         }
     }
 
@@ -185,6 +199,54 @@ extension SearchViewController {
                 secondaryActions: repairAction.map { [$0] } ?? [],
             ),
         ) ?? UIMenu()
+    }
+
+    func buildLyricsMatchMenu(for track: AudioTrackRecord) -> UIMenu {
+        songContextMenuProvider.menu(
+            for: track.playlistEntry,
+            context: .search,
+            configuration: .init(
+                availablePlaylists: { [weak self] in self?.environment.playlistStore.playlists ?? [] },
+                showInAlbum: { [weak self] in
+                    self?.albumNavigationHelper.pushAlbumDetail(
+                        songID: track.trackID,
+                        albumID: track.albumID,
+                        albumName: track.albumTitle,
+                        artistName: track.artistName,
+                    )
+                },
+                primaryActions: playbackMenuProvider.songPrimaryActions(
+                    trackProvider: { [weak self] in
+                        guard let self else { return nil }
+                        return track.playbackTrack(paths: environment.paths)
+                    },
+                    queueProvider: { [weak self] in
+                        self?.lyricsMatchPlaybackTracks() ?? []
+                    },
+                    sourceProvider: { [weak self] in
+                        .search(query: self?.searchState.currentQuery.nilIfEmpty)
+                    },
+                ),
+            ),
+        ) ?? UIMenu()
+    }
+
+    func playLyricsMatch(_ match: LyricsSearchService.Match) {
+        let allTracks = lyricsMatchPlaybackTracks()
+        let track = match.track.playbackTrack(paths: environment.paths)
+        let startIndex = allTracks.firstIndex(of: track) ?? 0
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            await environment.playbackController.play(
+                tracks: allTracks.isEmpty ? [track] : allTracks,
+                startAt: startIndex,
+                source: .search(query: searchState.currentQuery.nilIfEmpty),
+            )
+        }
+    }
+
+    func lyricsMatchPlaybackTracks() -> [PlaybackTrack] {
+        searchState.lyricsMatches.map { $0.track.playbackTrack(paths: environment.paths) }
     }
 
     func openAlbumForSong(_ song: CatalogSong) {

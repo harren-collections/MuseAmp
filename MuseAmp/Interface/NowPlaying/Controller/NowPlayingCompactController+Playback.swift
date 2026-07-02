@@ -12,6 +12,7 @@ extension NowPlayingCompactController {
     func handleContentSelectorChange(_ selector: NowPlayingControlIslandViewModel.ContentSelector) {
         updatePopupCloseButtonAppearance(for: selector)
         pageViewController.setSelector(selector, animated: true)
+        refreshLyricsScreenAwakeHold()
     }
 
     func updateQueuePresentation(queue: [PlaybackTrack], playerIndex: Int?, repeatMode: RepeatMode) {

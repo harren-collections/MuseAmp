@@ -9,13 +9,20 @@ import AVFoundation
 import CoreMedia
 
 public extension MusicPlayer {
-    func startPlayback(items: [PlayerItem], startIndex: Int = 0, shuffle: Bool = false) {
+    /// Start fresh playback of `items`.
+    ///
+    /// Pass a non-nil `startIndex` when the user picked a specific track; with
+    /// `shuffle: true` that track plays first and the rest are shuffled.
+    /// Pass `nil` (the default) when no specific track was chosen; with
+    /// `shuffle: true` the whole order — including the first track — is random,
+    /// and without shuffle playback starts at the first item.
+    func startPlayback(items: [PlayerItem], startIndex: Int? = nil, shuffle: Bool = false) {
         guard !items.isEmpty else {
             log(.warning, "startPlayback ignored because items are empty")
             return
         }
 
-        log(.info, "startPlayback count=\(items.count) startIndex=\(startIndex) shuffle=\(shuffle)")
+        log(.info, "startPlayback count=\(items.count) startIndex=\(startIndex.map(String.init) ?? "nil") shuffle=\(shuffle)")
         playbackQueue.load(items: items, startIndex: startIndex, shuffle: shuffle)
         log(.verbose, "queue loaded \(describe(queue: queue))")
         sessionManager.activate()

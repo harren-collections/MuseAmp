@@ -242,6 +242,7 @@ private extension SyncReceiverViewController {
                 session: session,
                 endpoint: endpoint,
                 token: token,
+                screenAwakeCoordinator: environment.screenAwakeCoordinator,
             ),
             animated: true,
         )

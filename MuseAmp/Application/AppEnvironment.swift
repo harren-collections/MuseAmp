@@ -30,6 +30,7 @@ final class AppEnvironment {
     let audioFileImporter: AudioFileImporter
     let playlistCoverArtworkCache: PlaylistCoverArtworkCache
     let trackArtworkRepairService: TrackArtworkRepairService
+    let screenAwakeCoordinator: ScreenAwakeCoordinator
 
     var cancellables: Set<AnyCancellable> = []
 
@@ -69,6 +70,8 @@ final class AppEnvironment {
             databaseManager: databaseManager,
         )
         networkMonitor = NetworkMonitor()
+        let screenAwakeCoordinator = ScreenAwakeCoordinator()
+        self.screenAwakeCoordinator = screenAwakeCoordinator
         downloadManager = DownloadManager(
             paths: paths,
             databaseManager: databaseManager,
@@ -77,7 +80,7 @@ final class AppEnvironment {
             lyricsCacheStore: databaseManager.lyricsCacheStore,
             networkMonitor: networkMonitor,
             screenAwakeHandler: { shouldKeepAwake in
-                UIApplication.shared.isIdleTimerDisabled = shouldKeepAwake
+                screenAwakeCoordinator.setActive(shouldKeepAwake, for: .downloadsActive)
             },
         )
         playbackController = PlaybackController(

@@ -320,9 +320,9 @@ final class TVRootViewController: UIViewController {
                     return
                 }
                 self.slideToProgress {
-                    Task { @MainActor [weak self] in
+                    Task { @MainActor in
                         try? await Task.sleep(nanoseconds: 500_000_000)
-                        self?.sessionStateAdapter.proceedWithTransfer()
+                        self.sessionStateAdapter.proceedWithTransfer()
                     }
                 }
             }
