@@ -1,5 +1,5 @@
 {
-  "originHash" : "1c894784651da5a3f311c3c2c7e1909ebac5eda315648460ac89a55e7ca01f3e",
+  "originHash" : "0812094289672c7140ef91cecdbad549b2dfed37d1ced8fa5f5555cf0dbdf47b",
   "pins" : [
     {
       "identity" : "alertcontroller",
@@ -69,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/onevcat/Kingfisher.git",
       "state" : {
-        "revision" : "c152c1915f60c51e4afa0752656993ee5b3c63db",
-        "version" : "8.8.1"
+        "revision" : "ac632bd26a1c00f139ff62fd01806f21cf67325e",
+        "version" : "8.10.0"
       }
     },
     {
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-collections",
       "state" : {
-        "revision" : "6675bc0ff86e61436e615df6fc5174e043e57924",
-        "version" : "1.4.1"
+        "revision" : "a0cb0954ecb21e4e31b0070e6ed5674e8556685a",
+        "version" : "1.6.0"
       }
     },
     {
