@@ -64,15 +64,10 @@ final class PlaylistTransferCoordinator: NSObject {
                 return track.playlistEntry
             }
 
-            let playlist = playlistStore.importPlaylist(
-                name: playlistName,
+            presentImportDestinationChoice(
+                playlistName: playlistName,
                 coverImageData: document.coverImageData,
                 entries: importedEntries,
-            )
-            onImportCompleted(playlist)
-            presentImportSummary(
-                playlist: playlist,
-                importedCount: importedEntries.count,
                 missingSongs: missingSongs,
             )
         } catch {
@@ -131,6 +126,141 @@ extension PlaylistTransferCoordinator: UIDocumentPickerDelegate {
 }
 
 private extension PlaylistTransferCoordinator {
+    func presentImportDestinationChoice(
+        playlistName: String,
+        coverImageData: Data?,
+        entries: [PlaylistEntry],
+        missingSongs: [PlaylistTransferDocument.SongReference],
+    ) {
+        guard let viewController else {
+            return
+        }
+
+        playlistStore.reload()
+        let mergeTargets = playlistStore.playlists
+        guard !mergeTargets.isEmpty, !entries.isEmpty else {
+            importAsNewPlaylist(
+                playlistName: playlistName,
+                coverImageData: coverImageData,
+                entries: entries,
+                missingSongs: missingSongs,
+            )
+            return
+        }
+
+        let alert = AlertViewController(
+            title: String(localized: "Import Playlist"),
+            message: String(localized: "Import \"\(playlistName)\" with \(entries.count) songs as a new playlist, or merge the songs into an existing playlist."),
+        ) { [weak self] context in
+            context.addAction(title: String(localized: "Cancel")) {
+                context.dispose()
+            }
+            context.addAction(title: String(localized: "Merge into Existing…")) {
+                context.dispose {
+                    self?.presentMergeTargetPicker(entries: entries, missingSongs: missingSongs)
+                }
+            }
+            context.addAction(title: String(localized: "Import as New"), attribute: .accent) {
+                context.dispose {
+                    self?.importAsNewPlaylist(
+                        playlistName: playlistName,
+                        coverImageData: coverImageData,
+                        entries: entries,
+                        missingSongs: missingSongs,
+                    )
+                }
+            }
+        }
+        viewController.present(alert, animated: true)
+    }
+
+    func importAsNewPlaylist(
+        playlistName: String,
+        coverImageData: Data?,
+        entries: [PlaylistEntry],
+        missingSongs: [PlaylistTransferDocument.SongReference],
+    ) {
+        let playlist = playlistStore.importPlaylist(
+            name: playlistName,
+            coverImageData: coverImageData,
+            entries: entries,
+        )
+        onImportCompleted(playlist)
+        presentImportSummary(
+            playlist: playlist,
+            importedCount: entries.count,
+            missingSongs: missingSongs,
+        )
+    }
+
+    func presentMergeTargetPicker(
+        entries: [PlaylistEntry],
+        missingSongs: [PlaylistTransferDocument.SongReference],
+    ) {
+        guard let viewController else {
+            return
+        }
+
+        let picker = PlaylistPickerViewController(
+            title: String(localized: "Merge into Playlist"),
+            playlists: playlistStore.playlists,
+        ) { [weak self] target in
+            self?.merge(entries: entries, into: target, missingSongs: missingSongs)
+        }
+        let navigationController = UINavigationController(rootViewController: picker)
+        navigationController.modalPresentationStyle = .formSheet
+        viewController.present(navigationController, animated: true)
+    }
+
+    func merge(
+        entries: [PlaylistEntry],
+        into target: Playlist,
+        missingSongs: [PlaylistTransferDocument.SongReference],
+    ) {
+        let result = playlistStore.mergeSongsSkippingDuplicates(entries, into: target.id)
+        guard let updated = playlistStore.playlist(for: target.id) else {
+            return
+        }
+        onImportCompleted(updated)
+        presentMergeSummary(
+            playlist: updated,
+            addedCount: result.added,
+            duplicateCount: result.skippedDuplicates,
+            missingSongs: missingSongs,
+        )
+    }
+
+    func presentMergeSummary(
+        playlist: Playlist,
+        addedCount: Int,
+        duplicateCount: Int,
+        missingSongs: [PlaylistTransferDocument.SongReference],
+    ) {
+        var lines = [String(localized: "Merged \(addedCount) songs into \"\(playlist.name)\".")]
+
+        if duplicateCount > 0 {
+            lines.append(String(localized: "Skipped \(duplicateCount) songs already in the playlist."))
+        }
+
+        if !missingSongs.isEmpty {
+            lines.append("")
+            lines.append(String(localized: "Missing \(missingSongs.count) songs in this library:"))
+
+            let previewSongs = Array(missingSongs.prefix(8))
+            lines.append(contentsOf: previewSongs.map { "- \($0.title) - \($0.artistName)" })
+
+            let remainingCount = missingSongs.count - previewSongs.count
+            if remainingCount > 0 {
+                lines.append(String(localized: "... and \(remainingCount) more"))
+            }
+        }
+
+        presentAlert(
+            title: String(localized: "Playlist Merged"),
+            message: lines.joined(separator: "\n"),
+        )
+    }
+
     func decodeDocument(from url: URL) throws -> PlaylistTransferDocument {
         let data = try Data(contentsOf: url)
         let decoder = JSONDecoder()

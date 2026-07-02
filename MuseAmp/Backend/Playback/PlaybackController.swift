@@ -141,7 +141,7 @@ final class PlaybackController: ObservableObject {
     @discardableResult
     func play(
         tracks: [PlaybackTrack],
-        startAt startIndex: Int = 0,
+        startAt startIndex: Int? = nil,
         source: PlaybackSource,
         shuffle: Bool = false,
     ) async -> Bool {
@@ -157,7 +157,9 @@ final class PlaybackController: ObservableObject {
         }
 
         let orderedItems = resolvedItems.map(\.item)
-        let preferredStart = preferredStartIndex(for: resolvedItems, requestedIndex: startIndex)
+        // nil start = no user-chosen track: shuffle must randomize the first
+        // song too, so the player must not receive a pinned index.
+        let preferredStart = startIndex.map { preferredStartIndex(for: resolvedItems, requestedIndex: $0) }
 
         queueState.currentSource = source
         queueState.trackLookup = Dictionary(uniqueKeysWithValues: resolvedItems.map { ($0.item.id, $0.track) })

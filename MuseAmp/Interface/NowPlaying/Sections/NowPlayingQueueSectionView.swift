@@ -90,7 +90,7 @@ class NowPlayingQueueSectionView: UIView, UITableViewDataSource, UITableViewDele
     var pendingContextMenuRemoval: Int?
 
     let queueTableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .plain)
+        let tableView = UITableView(frame: UIScreen.main.bounds, style: .plain)
         tableView.backgroundColor = .clear
         tableView.clipsToBounds = false
         tableView.allowsSelection = true

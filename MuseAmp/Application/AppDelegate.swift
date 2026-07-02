@@ -230,7 +230,11 @@ func terminateApplication() -> Never {
     #else
         UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
         Task.detached {
-            try await Task.sleep(for: .seconds(1))
+            do {
+                try await Task.sleep(for: .seconds(1))
+            } catch {
+                AppLog.warning("AppDelegate", "termination delay interrupted error=\(error)")
+            }
             exit(0)
         }
         sleep(5)

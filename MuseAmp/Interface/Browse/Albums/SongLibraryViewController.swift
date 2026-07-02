@@ -64,7 +64,7 @@ final class SongLibraryViewController: UIViewController {
     }
 
     let environment: AppEnvironment
-    let tableView = UITableView(frame: .zero, style: .plain)
+    let tableView = UITableView(frame: UIScreen.main.bounds, style: .plain)
     var dataSource: UITableViewDiffableDataSource<LibrarySection, LibraryItem>!
     var albums: [AlbumGroup] = []
     var albumsByID: [String: AlbumGroup] = [:]

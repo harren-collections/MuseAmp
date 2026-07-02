@@ -427,9 +427,9 @@ private extension SyncServerStatusViewController {
         let alert = AlertViewController(
             title: String(localized: "Transfer Failed"),
             message: message,
-        ) { context in
+        ) { [weak self] context in
             context.addAction(title: String(localized: "OK"), attribute: .accent) {
-                context.dispose { [weak self] in
+                context.dispose {
                     self?.navigationController?.popViewController(animated: true)
                 }
             }

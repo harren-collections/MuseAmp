@@ -1409,6 +1409,22 @@
         }
       }
     },
+    "Copy All Lyrics" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy All Lyrics"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制全部歌词"
+          }
+        }
+      }
+    },
     "Copy All Song Names" : {
       "localizations" : {
         "en" : {
@@ -1437,6 +1453,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "拷贝艺人名称"
+          }
+        }
+      }
+    },
+    "Copy Line" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy Line"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制此行"
           }
         }
       }
@@ -2497,6 +2529,22 @@
         }
       }
     },
+    "Import \"%@\" with %lld songs as a new playlist, or merge the songs into an existing playlist." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import \"%@\" with %lld songs as a new playlist, or merge the songs into an existing playlist."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将“%@”（%lld 首歌曲）导入为新歌单，或将这些歌曲合并到已有歌单。"
+          }
+        }
+      }
+    },
     "Import Complete" : {
       "localizations" : {
         "en" : {
@@ -2541,6 +2589,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "导入歌单"
+          }
+        }
+      }
+    },
+    "Import as New" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import as New"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入为新歌单"
           }
         }
       }
@@ -3149,6 +3213,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "合并到…"
+          }
+        }
+      }
+    },
+    "Merge into Existing…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merge into Existing…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合并到已有歌单…"
+          }
+        }
+      }
+    },
+    "Merge into Playlist" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merge into Playlist"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合并到歌单"
+          }
+        }
+      }
+    },
+    "Merged %lld songs into \"%@\"." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merged %lld songs into \"%@\"."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已合并 %lld 首歌曲到“%@”。"
           }
         }
       }
@@ -4227,6 +4339,22 @@
         }
       }
     },
+    "Playlist Merged" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlist Merged"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌单已合并"
+          }
+        }
+      }
+    },
     "Playlist Name" : {
       "localizations" : {
         "en" : {
@@ -5023,6 +5151,70 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在重新加载歌词"
+          }
+        }
+      }
+    },
+    "Remove" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除"
+          }
+        }
+      }
+    },
+    "Remove %lld duplicate songs from \"%@\"? The first added copy of each song is kept." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove %lld duplicate songs from \"%@\"? The first added copy of each song is kept."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要移除“%2$@”中的 %1$lld 首重复歌曲吗？每首歌曲将保留最早添加的一份。"
+          }
+        }
+      }
+    },
+    "Remove %lld duplicate songs from this playlist? The first added copy of each song is kept." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove %lld duplicate songs from this playlist? The first added copy of each song is kept."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要移除此歌单中的 %lld 首重复歌曲吗？每首歌曲将保留最早添加的一份。"
+          }
+        }
+      }
+    },
+    "Remove Duplicates" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove Duplicates"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除重复歌曲"
           }
         }
       }
@@ -6099,6 +6291,22 @@
         }
       }
     },
+    "Skipped %lld songs already in the playlist." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skipped %lld songs already in the playlist."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已跳过 %lld 首歌单中已有的歌曲。"
+          }
+        }
+      }
+    },
     "Song" : {
       "localizations" : {
         "en" : {
@@ -6211,18 +6419,18 @@
         }
       }
     },
-    "Songs, Albums" : {
+    "Songs, Albums, Lyrics" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Songs, Albums"
+            "value" : "Songs, Albums, Lyrics"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "歌曲，专辑"
+            "value" : "歌曲、专辑、歌词"
           }
         }
       }

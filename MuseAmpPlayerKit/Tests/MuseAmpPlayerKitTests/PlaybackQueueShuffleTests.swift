@@ -101,13 +101,42 @@ struct PlaybackQueueShuffleTests {
         #expect(queue.nowPlaying == currentBefore)
     }
 
-    @Test func `load with shuffle pins start index at front`() {
+    @Test func `load with shuffle pins explicit start index at front`() {
         var queue = PlaybackQueue()
         let items = Self.makeItems(5)
         queue.load(items: items, startIndex: 2, shuffle: true)
 
         #expect(queue.nowPlaying == items[2])
         #expect(queue.upcoming.count == 4) // All other items
+    }
+
+    @Test func `load with shuffle and no start index randomizes first track`() {
+        let items = Self.makeItems(8)
+        let allIDs = Set(items.map(\.id))
+        var observedFirstIDs: Set<String> = []
+
+        for _ in 0 ..< 50 {
+            var queue = PlaybackQueue()
+            queue.load(items: items, startIndex: nil, shuffle: true)
+
+            let nowPlaying = queue.nowPlaying
+            #expect(nowPlaying != nil)
+            #expect(queue.history.isEmpty)
+            #expect(queue.upcoming.count == items.count - 1)
+
+            // The full play order must be a valid permutation of all items
+            let orderedIDs = ([nowPlaying].compactMap(\.self) + queue.upcoming).map(\.id)
+            #expect(Set(orderedIDs) == allIDs)
+            #expect(orderedIDs.count == items.count)
+
+            if let firstID = nowPlaying?.id {
+                observedFirstIDs.insert(firstID)
+            }
+        }
+
+        // With 8 items and 50 loads, a pinned first track would always yield
+        // the same ID; a random first track yields more than one.
+        #expect(observedFirstIDs.count > 1)
     }
 
     @Test func `jump keeps full queue and updates history`() {

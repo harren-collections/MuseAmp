@@ -54,7 +54,7 @@ final class SyncContentPickerViewController: UIViewController {
     private let segmentControl = UISegmentedControl(
         items: ContentTab.allCases.map(\.title),
     )
-    private let tableView = UITableView(frame: .zero, style: .plain)
+    private let tableView = UITableView(frame: UIScreen.main.bounds, style: .plain)
     private var dataSource: UITableViewDiffableDataSource<Section, Item>!
 
     private lazy var sendButton = UIBarButtonItem(
@@ -186,9 +186,9 @@ private extension SyncContentPickerViewController {
                 )
                 let artworkTrackID = album.artworkTrackID ?? album.albumID
                 let cacheURL = environment.paths.artworkCacheURL(for: artworkTrackID)
-                MuseAmpImageView.diskLoadQueue.async {
+                MuseAmpImageView.diskLoadQueue.async { [weak cell] in
                     guard FileManager.default.fileExists(atPath: cacheURL.path) else { return }
-                    DispatchQueue.main.async { [weak cell] in
+                    DispatchQueue.main.async {
                         cell?.loadArtwork(url: cacheURL)
                     }
                 }
@@ -204,9 +204,9 @@ private extension SyncContentPickerViewController {
 
                 let cacheURL = environment.paths.artworkCacheURL(for: track.trackID)
                 cell.configure(content: SongRowContent(audioTrack: track))
-                MuseAmpImageView.diskLoadQueue.async {
+                MuseAmpImageView.diskLoadQueue.async { [weak cell] in
                     guard FileManager.default.fileExists(atPath: cacheURL.path) else { return }
-                    DispatchQueue.main.async { [weak cell] in
+                    DispatchQueue.main.async {
                         cell?.loadArtwork(url: cacheURL)
                     }
                 }
@@ -249,15 +249,22 @@ private extension SyncContentPickerViewController {
             let database = environment.libraryDatabase
             let store = environment.playlistStore
 
-            let (albums, tracks) = try await Task.detached(priority: .userInitiated) {
-                let albums = try database.allAlbums().sorted {
-                    $0.albumTitle.localizedCaseInsensitiveCompare($1.albumTitle) == .orderedAscending
-                }
-                let tracks = try database.allTracks().sorted {
-                    $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
-                }
-                return (albums, tracks)
-            }.value
+            let albums: [AlbumGroup]
+            let tracks: [AudioTrackRecord]
+            do {
+                (albums, tracks) = try await Task.detached(priority: .userInitiated) {
+                    let albums = try database.allAlbums().sorted {
+                        $0.albumTitle.localizedCaseInsensitiveCompare($1.albumTitle) == .orderedAscending
+                    }
+                    let tracks = try database.allTracks().sorted {
+                        $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
+                    }
+                    return (albums, tracks)
+                }.value
+            } catch {
+                AppLog.error(self, "loadData failed error=\(error)")
+                return
+            }
 
             allAlbums = albums
             albumsByID = Dictionary(uniqueKeysWithValues: albums.map { ($0.albumID, $0) })

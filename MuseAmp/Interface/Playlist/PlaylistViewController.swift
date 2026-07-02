@@ -73,7 +73,7 @@ class PlaylistViewController: UIViewController {
 
     let environment: AppEnvironment?
     let store: PlaylistStore
-    let tableView = UITableView(frame: .zero, style: .plain)
+    let tableView = UITableView(frame: UIScreen.main.bounds, style: .plain)
     var sortOption: SortOption = AppPreferences.storedSortOption(
         forKey: AppPreferences.playlistsSortOptionKey,
         defaultValue: .recentlyModified,

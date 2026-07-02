@@ -25,7 +25,7 @@ final class LyricTimelineView: UIView {
     }
 
     let tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .plain)
+        let tableView = UITableView(frame: UIScreen.main.bounds, style: .plain)
         tableView.backgroundColor = .clear
         tableView.separatorStyle = .none
         tableView.showsVerticalScrollIndicator = false
@@ -50,6 +50,14 @@ final class LyricTimelineView: UIView {
     var renderedTimeline: LyricTimeline?
 
     let environment: AppEnvironment
+    lazy var lineMenuProvider: LyricLineMenuProvider = {
+        let provider = LyricLineMenuProvider(playbackController: environment.playbackController)
+        provider.onSelectAndCopy = { [weak self] lines, selectedIndex in
+            self?.presentLyricSelectionSheet(lyrics: lines, activeIndex: selectedIndex)
+        }
+        return provider
+    }()
+
     var cancellables: Set<AnyCancellable> = []
     let focusSubject = PassthroughSubject<Void, Never>()
     let interactionSubject = PassthroughSubject<Void, Never>()
@@ -61,7 +69,7 @@ final class LyricTimelineView: UIView {
 
     init(environment: AppEnvironment) {
         self.environment = environment
-        super.init(frame: .zero)
+        super.init(frame: UIScreen.main.bounds)
 
         addSubview(tableView)
         addSubview(topBlurView)

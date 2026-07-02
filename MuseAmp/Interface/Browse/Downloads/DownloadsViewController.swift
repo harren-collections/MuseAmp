@@ -35,7 +35,7 @@ final class DownloadsViewController: UIViewController {
 
     private let downloadManager: DownloadManager
     private let environment: AppEnvironment?
-    private let tableView = UITableView(frame: .zero, style: .plain)
+    private let tableView = UITableView(frame: UIScreen.main.bounds, style: .plain)
     private let emptyStateView = EmptyStateView(
         icon: "arrow.down.circle",
         title: String(localized: "No Active Downloads"),

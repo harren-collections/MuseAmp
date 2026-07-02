@@ -22,7 +22,7 @@ class NowPlayingCenterSectionView: UIView {
         avatarSectionView = NowPlayingAvatarSectionView(environment: environment)
         self.transportContentView = transportContentView
         self.transportLayout = transportLayout
-        super.init(frame: .zero)
+        super.init(frame: UIScreen.main.bounds)
         backgroundColor = .clear
         setupViewHierarchy()
         setupLayout()

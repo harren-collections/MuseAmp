@@ -50,6 +50,9 @@ extension SearchViewController {
         applySnapshot(animating: false)
         searchTask = Task { [weak self] in
             guard let self else { return }
+            // Lyrics search is local-only and must survive remote failures, so
+            // it runs outside the throwing remote task group.
+            async let pendingLyricsMatches = lyricsSearchService.search(query: trimmed, limit: lyricsPageSize)
             do {
                 let results = try await withThrowingTaskGroup(of: SearchResult.self) { group in
                     group.addTask { try await .songs(self.apiClient.searchSongs(query: trimmed, limit: self.songPageSize, offset: 0)) }
@@ -60,6 +63,7 @@ extension SearchViewController {
                     }
                     return collected
                 }
+                let lyricsMatches = await pendingLyricsMatches
                 guard !Task.isCancelled else { return }
                 var newSongs: [CatalogSong] = []; var newAlbums: [CatalogAlbum] = []
                 for result in results {
@@ -70,7 +74,7 @@ extension SearchViewController {
                 }
                 await MainActor.run {
                     let hadPreviousResults = self.searchState.hasResults
-                    self.updateInitialResults(query: trimmed, songs: newSongs, albums: newAlbums)
+                    self.updateInitialResults(query: trimmed, songs: newSongs, albums: newAlbums, lyricsMatches: lyricsMatches)
 
                     if hadPreviousResults {
                         Interface.transition(with: self.tableView, duration: 0.2) {
@@ -82,9 +86,11 @@ extension SearchViewController {
                     self.saveQuery(trimmed)
                 }
             } catch {
+                let lyricsMatches = await pendingLyricsMatches
                 if !Task.isCancelled {
                     await MainActor.run {
                         self.searchState.isSearching = false
+                        self.searchState.lyricsMatches = lyricsMatches
                         self.searchState.searchError = error.localizedDescription
                         self.applySnapshot(animating: false)
                     }
@@ -104,6 +110,7 @@ extension SearchViewController {
         query: String,
         songs: [CatalogSong],
         albums: [CatalogAlbum],
+        lyricsMatches: [LyricsSearchService.Match] = [],
     ) {
         searchState.songs.items = deduplicated(songs, label: "song", source: "initial")
         searchState.songs.offset = songs.count
@@ -111,6 +118,7 @@ extension SearchViewController {
         searchState.albums.items = deduplicated(albums, label: "album", source: "initial")
         searchState.albums.offset = albums.count
         searchState.albums.hasMore = albums.count >= mediaPageSize
+        searchState.lyricsMatches = lyricsMatches
         searchState.currentQuery = query
         searchState.isSearching = false
         searchState.searchError = nil
@@ -143,11 +151,13 @@ extension SearchViewController {
         }
         let songScore = score(names: searchState.songs.items.map(\.attributes.name))
         let albumScore = score(names: searchState.albums.items.map(\.attributes.name))
-        let tb: [SearchSection: Int] = [.songs: 0, .albums: 1, .loading: 2]
+        // Lyrics matches never match by name, so they always sort after
+        // name-matched sections while keeping a stable position otherwise.
+        let tb: [SearchSection: Int] = [.songs: 0, .albums: 1, .lyrics: 2, .loading: 3]
         searchState.sectionOrder = SearchSection.resultSections.sorted { a, b in
             let sa: Int; let sb: Int
-            switch a { case .songs: sa = songScore; case .albums: sa = albumScore; case .loading: sa = -1 }
-            switch b { case .songs: sb = songScore; case .albums: sb = albumScore; case .loading: sb = -1 }
+            switch a { case .songs: sa = songScore; case .albums: sa = albumScore; case .lyrics: sa = 0; case .loading: sa = -1 }
+            switch b { case .songs: sb = songScore; case .albums: sb = albumScore; case .lyrics: sb = 0; case .loading: sb = -1 }
             if sa != sb { return sa > sb }; return tb[a]! < tb[b]!
         }
     }
@@ -166,7 +176,7 @@ extension SearchViewController {
             offset = searchState.songs.offset
         case .albums:
             offset = searchState.albums.offset
-        case .loading:
+        case .lyrics, .loading:
             return
         }
         Task { [weak self] in
@@ -187,7 +197,7 @@ extension SearchViewController {
                         self.updatePaginatedResults(section: section, items: .albums(items))
                         self.applySnapshot()
                     }
-                case .loading:
+                case .lyrics, .loading:
                     return
                 }
             } catch {

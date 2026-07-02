@@ -23,6 +23,7 @@ struct SearchPage<Item> {
 struct SearchResultsState {
     var songs = SearchPage<CatalogSong>()
     var albums = SearchPage<CatalogAlbum>()
+    var lyricsMatches: [LyricsSearchService.Match] = []
     var loadingMore: Set<SearchSection> = []
     var sectionOrder: [SearchSection] = SearchSection.resultSections
     var currentQuery = ""
@@ -30,12 +31,13 @@ struct SearchResultsState {
     var searchError: String?
 
     var hasResults: Bool {
-        !songs.items.isEmpty || !albums.items.isEmpty
+        !songs.items.isEmpty || !albums.items.isEmpty || !lyricsMatches.isEmpty
     }
 
     mutating func reset() {
         songs.reset()
         albums.reset()
+        lyricsMatches = []
         loadingMore = []
         sectionOrder = SearchSection.resultSections
         currentQuery = ""

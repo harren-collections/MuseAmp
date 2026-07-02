@@ -58,7 +58,7 @@ class NowPlayingPagingSectionView: UIView {
         self.queueView = queueView
         self.artworkView = artworkView
         self.lyricsView = lyricsView
-        super.init(frame: .zero)
+        super.init(frame: UIScreen.main.bounds)
         backgroundColor = .clear
         installPagingScrollView()
         installPages()

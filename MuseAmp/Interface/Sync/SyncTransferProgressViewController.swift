@@ -355,9 +355,9 @@ private extension SyncTransferProgressViewController {
     }
 
     func presentAlertAndPop(title: String, message: String) {
-        let alert = AlertViewController(title: title, message: message) { context in
+        let alert = AlertViewController(title: title, message: message) { [weak self] context in
             context.addAction(title: String(localized: "OK"), attribute: .accent) {
-                context.dispose { [weak self] in
+                context.dispose {
                     self?.navigationController?.popViewController(animated: true)
                 }
             }

@@ -322,6 +322,83 @@ final class PlaylistStore {
         }
     }
 
+    /// Appends `songs` to the target playlist in a single transactional write,
+    /// skipping songs whose trackID is already present in the target.
+    @discardableResult
+    func mergeSongsSkippingDuplicates(
+        _ songs: [PlaylistEntry],
+        into playlistID: UUID,
+    ) -> (added: Int, skippedDuplicates: Int) {
+        reload()
+        guard var playlist = playlist(for: playlistID) else { return (0, 0) }
+
+        var seen = Set(playlist.songs.map(\.trackID))
+        var appended: [PlaylistEntry] = []
+        for song in songs {
+            guard seen.insert(song.trackID).inserted else { continue }
+            appended.append(PlaylistEntry(
+                trackID: song.trackID,
+                title: song.title,
+                artistName: song.artistName,
+                albumID: song.albumID,
+                albumTitle: song.albumTitle,
+                artworkURL: song.artworkURL,
+                durationMillis: song.durationMillis,
+                trackNumber: song.trackNumber,
+                lyrics: song.lyrics,
+            ))
+        }
+        let skipped = songs.count - appended.count
+        guard !appended.isEmpty else { return (0, skipped) }
+
+        playlist.songs += appended
+        let previousPlaylists = playlists
+        do {
+            // Single transactional replace: per-entry adds would leave the
+            // target partially merged on a mid-loop failure.
+            _ = try send(.importLegacyPlaylists([playlist]))
+        } catch {
+            AppLog.error(self, "mergeSongsSkippingDuplicates failed playlistID=\(playlistID.uuidString) error=\(error)")
+            return (0, skipped)
+        }
+        AppLog.info(self, "mergeSongsSkippingDuplicates playlistID=\(playlistID.uuidString) added=\(appended.count) skipped=\(skipped)")
+        reload()
+        notifyIfNeeded(previousPlaylists: previousPlaylists)
+        return (appended.count, skipped)
+    }
+
+    func duplicateSongCount(in playlistID: UUID) -> Int {
+        guard let playlist = playlist(for: playlistID) else { return 0 }
+        var seen: Set<String> = []
+        return playlist.songs.count(where: { !seen.insert($0.trackID).inserted })
+    }
+
+    @discardableResult
+    func removeDuplicateSongs(in playlistID: UUID) -> Int {
+        reload()
+        guard var playlist = playlist(for: playlistID) else { return 0 }
+
+        var seen: Set<String> = []
+        let dedupedSongs = playlist.songs.filter { seen.insert($0.trackID).inserted }
+        let removedCount = playlist.songs.count - dedupedSongs.count
+        guard removedCount > 0 else { return 0 }
+
+        playlist.songs = dedupedSongs
+        let previousPlaylists = playlists
+        do {
+            // Single transactional replace: removing entries one by one would
+            // leave the playlist partially deduplicated on a mid-loop failure.
+            _ = try send(.importLegacyPlaylists([playlist]))
+        } catch {
+            AppLog.error(self, "removeDuplicateSongs failed playlistID=\(playlistID.uuidString) error=\(error)")
+            return 0
+        }
+        AppLog.info(self, "removeDuplicateSongs playlistID=\(playlistID.uuidString) removed=\(removedCount)")
+        reload()
+        notifyIfNeeded(previousPlaylists: previousPlaylists)
+        return removedCount
+    }
+
     func playlist(for id: UUID) -> Playlist? {
         playlists.first { $0.id == id }
     }
