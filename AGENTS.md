@@ -32,6 +32,7 @@
 ### Backend Layer
 
 - `Backend/API/`: `APIClient` and intent-level network entry points.
+- `Backend/AppleMusic/`: Apple Music (MusicKit) authorization and library reads, plus matching Apple Music songs against the catalog and importing matched playlists through `PlaylistStore`. Library access requires iOS 16 / Mac Catalyst 17; gate call sites with `#available`.
 - `Backend/Downloads/`: download orchestration plus persisted download records.
 - `Backend/Library/`: local and remote library data providers that bridge app services into browseable media collections.
 - `Backend/Logging/`: file-backed logging and log reading. Extend this instead of adding a second diagnostics path.
@@ -59,6 +60,7 @@
 - `Interface/Browse/Downloads/`: downloads browse UI and download-list presentation.
 - `Interface/Browse/Support/`: browse-only helpers that are shared across album/song/download flows.
 - `Interface/Search/`, `NowPlaying/`, `Playlist/`, `Settings/`: feature-owned UI outside the browse domain.
+- `Interface/AppleMusicImport/`: Apple Music playlist import flow (authorization states, playlist list, import progress and result presentation), entered from Settings.
 - `Interface/Sync/`: LAN transfer UIKit flows for sender setup, receiver discovery/manual connect, QR handoff, and transfer progress.
 - `Interface/NowPlaying/Controller/`: main view controller and its responsibility-based extensions.
 - `Interface/NowPlaying/ViewModel/`: view models for now playing state presentation.

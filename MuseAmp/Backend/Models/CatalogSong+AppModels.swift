@@ -10,7 +10,7 @@ import MuseAmpDatabaseKit
 import SubsonicClientKit
 
 extension CatalogSong {
-    func playlistEntry(
+    nonisolated func playlistEntry(
         albumID: String? = nil,
         albumName: String? = nil,
     ) -> PlaylistEntry {

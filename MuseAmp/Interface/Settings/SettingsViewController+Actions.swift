@@ -81,6 +81,25 @@ extension SettingsViewController {
         navigationController?.pushViewController(controller, animated: true)
     }
 
+    @available(iOS 16.0, macCatalyst 17.0, *)
+    func makeAppleMusicImportObject() -> ConfigurableObject {
+        ConfigurableObject(
+            icon: "music.note.house",
+            title: "Import from Apple Music",
+            explain: "Connect your Apple Music library and import playlists by matching songs against this library.",
+            ephemeralAnnotation: .action { [weak self] _ in
+                guard let self else { return }
+                openAppleMusicImport()
+            },
+        )
+    }
+
+    @available(iOS 16.0, macCatalyst 17.0, *)
+    func openAppleMusicImport() {
+        let controller = AppleMusicImportViewController(environment: environment)
+        navigationController?.pushViewController(controller, animated: true)
+    }
+
     func makeRebuildDatabaseObject() -> ConfigurableObject {
         ConfigurableObject(
             icon: "arrow.triangle.2.circlepath",

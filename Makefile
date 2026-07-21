@@ -53,6 +53,7 @@ XCODEBUILD := $(XCODEBUILD_WRAPPER) \
 
 .PHONY: all help \
         build build-ios build-catalyst build-tvos \
+        build-device install-device launch-device run-device \
         test test-unit \
         package-resolve scan-license \
         format format-lint \
@@ -72,6 +73,12 @@ help:
 	@echo "  build-ios          Build the iOS app (scheme: $(IOS_SCHEME))"
 	@echo "  build-catalyst     Build the Mac Catalyst app (scheme: $(IOS_SCHEME))"
 	@echo "  build-tvos         Build the tvOS app (scheme: $(TV_SCHEME))"
+	@echo ""
+	@echo "Device (physical iPhone/iPad):"
+	@echo "  build-device       Build the iOS app signed for physical devices"
+	@echo "  install-device     Install the built app (device=<name-or-udid>)"
+	@echo "  launch-device      Launch the installed app (device=<name-or-udid>)"
+	@echo "  run-device         build-device + install-device + launch-device"
 	@echo ""
 	@echo "Test:"
 	@echo "  test               Build all platforms, then run the full test suite"
@@ -126,6 +133,42 @@ build-tvos:
 	    -scheme $(TV_SCHEME) \
 	    -destination "$(TVOS_DESTINATION)" \
 	    build
+
+# =============================================================================
+# Device deploy
+# =============================================================================
+
+# Signed build for physical devices. Signing and provisioning need the real
+# HOME (login keychain, Xcode accounts), so this variant does not sandbox HOME
+# and does not force CODE_SIGNING_ALLOWED=NO like $(XCODEBUILD).
+XCODEBUILD_DEVICE := $(XCODEBUILD_WRAPPER) \
+    -workspace "$(WORKSPACE)" \
+    -project "$(PROJECT)" \
+    -configuration $(CONFIGURATION) \
+    -derivedDataPath "$(DERIVED_DATA)" \
+    -skipMacroValidation \
+    -skipPackagePluginValidation \
+    -allowProvisioningUpdates
+
+DEVICE_APP       := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/MuseAmp.app
+DEVICE_BUNDLE_ID := wiki.qaq.muse.amp
+
+build-device:
+	mkdir -p "$(XDG_CACHE_HOME)" "$(MODULE_CACHE)"
+	CLANG_MODULE_CACHE_PATH="$(MODULE_CACHE)" SWIFTPM_MODULECACHE_OVERRIDE="$(MODULE_CACHE)" XCBUILD_LABEL=build-device $(XCODEBUILD_DEVICE) \
+	    -scheme $(IOS_SCHEME) \
+	    -destination "$(IOS_DESTINATION)" \
+	    build
+
+install-device:
+	@test -n "$(device)" || { echo "usage: make install-device device=<name-or-udid>"; exit 1; }
+	xcrun devicectl device install app --device "$(device)" "$(DEVICE_APP)"
+
+launch-device:
+	@test -n "$(device)" || { echo "usage: make launch-device device=<name-or-udid>"; exit 1; }
+	xcrun devicectl device process launch --device "$(device)" $(DEVICE_BUNDLE_ID)
+
+run-device: build-device install-device launch-device
 
 # =============================================================================
 # Test

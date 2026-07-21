@@ -49,6 +49,22 @@
         }
       }
     },
+    "%d songs were not found in your library." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d songs were not found in your library."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有 %d 首歌曲未能在你的资料库中找到。"
+          }
+        }
+      }
+    },
     "%lld" : {
       "localizations" : {
         "en" : {
@@ -657,6 +673,22 @@
         }
       }
     },
+    "Allow access to your Apple Music library in the Settings app, then try again." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow access to your Apple Music library in the Settings app, then try again."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请在“设置”App 中允许访问你的 Apple Music 资料库，然后重试。"
+          }
+        }
+      }
+    },
     "Allow camera access in Settings or choose an Apple TV from nearby discovery instead." : {
       "localizations" : {
         "en" : {
@@ -717,6 +749,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已在播放"
+          }
+        }
+      }
+    },
+    "Apple Music Access Denied" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music Access Denied"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法访问 Apple Music"
+          }
+        }
+      }
+    },
+    "Apple Music Playlist" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music Playlist"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music 歌单"
           }
         }
       }
@@ -1345,6 +1409,22 @@
         }
       }
     },
+    "Connect your Apple Music library and import playlists by matching songs against this library." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connect your Apple Music library and import playlists by matching songs against this library."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "连接你的 Apple Music 资料库，通过歌曲匹配将歌单导入到此资料库。"
+          }
+        }
+      }
+    },
     "Connecting" : {
       "localizations" : {
         "en" : {
@@ -1469,6 +1549,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "复制此行"
+          }
+        }
+      }
+    },
+    "Could Not Load Playlists" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could Not Load Playlists"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法加载歌单"
           }
         }
       }
@@ -2401,6 +2497,22 @@
         }
       }
     },
+    "Fetching songs from Apple Music..." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fetching songs from Apple Music..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在从 Apple Music 获取歌曲..."
+          }
+        }
+      }
+    },
     "Files that could not be downloaded or imported cleanly." : {
       "localizations" : {
         "en" : {
@@ -2609,6 +2721,22 @@
         }
       }
     },
+    "Import from Apple Music" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import from Apple Music"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从 Apple Music 导入"
+          }
+        }
+      }
+    },
     "Import from File" : {
       "localizations" : {
         "en" : {
@@ -2641,6 +2769,22 @@
         }
       }
     },
+    "Import “%@” from Apple Music? Each song will be matched against your music library." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import “%@” from Apple Music? Each song will be matched against your music library."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要从 Apple Music 导入“%@”吗？每首歌曲都会与你的音乐资料库进行匹配。"
+          }
+        }
+      }
+    },
     "Imported" : {
       "localizations" : {
         "en" : {
@@ -2669,6 +2813,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已导入 “%@”，包含 %lld 首歌曲。"
+          }
+        }
+      }
+    },
+    "Imported %1$d of %2$d songs into “%3$@”." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imported %1$d of %2$d songs into “%3$@”."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已将 %2$d 首歌曲中的 %1$d 首导入到“%3$@”。"
           }
         }
       }
@@ -2733,6 +2893,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在导入 %1$lld / %2$lld..."
+          }
+        }
+      }
+    },
+    "Importing Playlist" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importing Playlist"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在导入歌单"
           }
         }
       }
@@ -3201,6 +3377,22 @@
         }
       }
     },
+    "Matching songs %d/%d..." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Matching songs %d/%d..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在匹配歌曲 %1$d/%2$d..."
+          }
+        }
+      }
+    },
     "Merge Into…" : {
       "localizations" : {
         "en" : {
@@ -3539,6 +3731,38 @@
         }
       }
     },
+    "No Matches Found" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Matches Found"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到匹配歌曲"
+          }
+        }
+      }
+    },
+    "No Playlists Found" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Playlists Found"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到歌单"
+          }
+        }
+      }
+    },
     "No Playlists Yet" : {
       "localizations" : {
         "en" : {
@@ -3743,6 +3967,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "没有要下载的曲目。"
+          }
+        }
+      }
+    },
+    "None of the %1$d songs in “%2$@” were found in your music library." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None of the %1$d songs in “%2$@” were found in your music library."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%2$@”中的 %1$d 首歌曲均未能在你的音乐资料库中找到。"
           }
         }
       }
@@ -8067,6 +8307,22 @@
         }
       }
     },
+    "Your Apple Music library has no playlists to import." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your Apple Music library has no playlists to import."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的 Apple Music 资料库中没有可导入的歌单。"
+          }
+        }
+      }
+    },
     "already existed" : {
       "localizations" : {
         "en" : {
@@ -8111,6 +8367,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "iPhone 传输完成"
+          }
+        }
+      }
+    },
+    "“%@” has no songs." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” has no songs."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@”中没有歌曲。"
           }
         }
       }
