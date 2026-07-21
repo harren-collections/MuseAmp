@@ -60,6 +60,10 @@ final class SettingsViewController: StackScrollController {
         stackView.addArrangedSubview(SeparatorView())
         stackView.addArrangedSubviewWithMargin(makeTransferObject().createView())
         stackView.addArrangedSubview(SeparatorView())
+        if #available(iOS 16.0, macCatalyst 17.0, *) {
+            stackView.addArrangedSubviewWithMargin(makeAppleMusicImportObject().createView())
+            stackView.addArrangedSubview(SeparatorView())
+        }
         let downloads = makeDownloadsObject()
         downloadsObject = downloads
         stackView.addArrangedSubviewWithMargin(downloads.createView())
